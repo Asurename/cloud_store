@@ -1,0 +1,7 @@
+cmd/cmd_rm.o: cmd/cmd_rm.c cmd/server_cmd.h cmd/../frame/cmd_tast.h \
+ cmd/../frame/../config/config.h
+cmd/server_cmd.h:
+cmd/../frame/cmd_tast.h:
+cmd/../frame/../config/config.h:
+cmd/cmd_rm.c cmd/server_cmd.h cmd/../frame/cmd_tast.h :
+ cmd/../frame/../config/config.h :

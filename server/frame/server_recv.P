@@ -1,0 +1,12 @@
+frame/server_recv.o: frame/server_recv.c frame/server_recv.h \
+ frame/pthreadpool.h frame/tast_queue.h frame/../config/config.h \
+ frame/epoll_plug.h frame/cmd_tast.h
+frame/server_recv.h:
+frame/pthreadpool.h:
+frame/tast_queue.h:
+frame/../config/config.h:
+frame/epoll_plug.h:
+frame/cmd_tast.h:
+frame/server_recv.c frame/server_recv.h :
+ frame/pthreadpool.h frame/tast_queue.h frame/../config/config.h :
+ frame/epoll_plug.h frame/cmd_tast.h :

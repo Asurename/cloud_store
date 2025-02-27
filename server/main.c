@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <func.h>
+#include "lib.h"
+
+int main(){
+    //建立网络连接
+    int cmd_fd = tcp_connection_bliud(IP,PORT_CMD);
+    int tsf_fd = tcp_connection_bliud(IP,PORT_TSF);
+
+    MYSQL* p_mysql;
+    p_mysql = mysql_disk_connect(MYSQL_IP,MYSQL_PORT,MYSQL_NAME,MYSQL_PASSWD,MYSQL_DB);
+
+    //初始化线程池
+    threadpool* thp_cmd = threadpool_init(THP_CMD_NUM);
+    threadpool* thp_tsf = threadpool_init(THP_TSF_NUM);
+    threadpool* thp_dct = threadpool_init(1);
+    struct user_table *ut = user_table_init();
+
+    //线程池启动
+    threadpool_start(thp_cmd,thp_cmd_function,(void*)thp_cmd->q);
+    threadpool_start(thp_tsf,thp_tsf_function,(void*)thp_tsf->q);
+    threadpool_start(thp_dct,thp_dct_function,(void*)ut);
+
+    //建立epoll监听
+    int ep_fd = epoll_create1(0);
+    epoll_mod(ep_fd,EPOLL_CTL_ADD,EPOLLIN,cmd_fd);
+    struct epoll_event recv_events[RECV_EVENTS_NUM];
+
+    int recv_num;
+    sleep(1);
+    printf("[System]The server is ready...\n");
+    while(1){
+        recv_num = epoll_wait(ep_fd,recv_events,RECV_EVENTS_NUM,-1);
+        for(int i = 0;i<recv_num;i++){
+            if(recv_events[i].data.fd == cmd_fd){
+                //进行新用户的接收
+                server_user_recv(cmd_fd,ep_fd,p_mysql);
+            }else{
+                server_msg_recv(recv_events[i].data.fd,ep_fd,thp_cmd,thp_tsf);
+            }
+        }
+    }
+}
+

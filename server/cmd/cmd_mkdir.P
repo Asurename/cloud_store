@@ -1,0 +1,7 @@
+cmd/cmd_mkdir.o: cmd/cmd_mkdir.c cmd/server_cmd.h cmd/../frame/cmd_tast.h \
+ cmd/../frame/../config/config.h
+cmd/server_cmd.h:
+cmd/../frame/cmd_tast.h:
+cmd/../frame/../config/config.h:
+cmd/cmd_mkdir.c cmd/server_cmd.h cmd/../frame/cmd_tast.h :
+ cmd/../frame/../config/config.h :

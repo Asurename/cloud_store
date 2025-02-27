@@ -1,0 +1,7 @@
+frame/pthreadpool.o: frame/pthreadpool.c frame/pthreadpool.h \
+ frame/tast_queue.h frame/../config/config.h
+frame/pthreadpool.h:
+frame/tast_queue.h:
+frame/../config/config.h:
+frame/pthreadpool.c frame/pthreadpool.h :
+ frame/tast_queue.h frame/../config/config.h :
