@@ -1,4 +1,5 @@
 #include "../lib.h"
+//服务端tcp等待连接的建立，最后返回fd
 int tcp_connection_bliud(const char *ip,int port){
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;

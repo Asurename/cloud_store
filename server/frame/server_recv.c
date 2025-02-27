@@ -37,7 +37,9 @@ int server_msg_recv(int fd, int epfd, threadpool* thp_cmd,threadpool* thp_tsf){
         return -1;
     }
     
+
     recv_t->peerfd = fd;
+    //把短命令和长命令扔进不同的任务队列，不同的线程池会去处理
     if(recv_t->cmdType == CMD_TYPE_DOWNLOAD ||recv_t->cmdType == CMD_TYPE_UPLOAD||
        recv_t->cmdType == CMD_TYPE_DOWNLOAD_BG){
 
