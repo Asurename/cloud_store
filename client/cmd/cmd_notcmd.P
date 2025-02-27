@@ -1,7 +1,0 @@
-cmd/cmd_notcmd.o: cmd/cmd_notcmd.c cmd/server_cmd.h \
- cmd/../frame/cmd_tast.h cmd/../frame/../config/config.h
-cmd/server_cmd.h:
-cmd/../frame/cmd_tast.h:
-cmd/../frame/../config/config.h:
-cmd/cmd_notcmd.c cmd/server_cmd.h :
- cmd/../frame/cmd_tast.h cmd/../frame/../config/config.h :

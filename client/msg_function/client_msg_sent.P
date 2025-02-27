@@ -1,0 +1,10 @@
+msg_function/client_msg_sent.o: msg_function/client_msg_sent.c \
+ msg_function/client_msg_sent.h msg_function/../frame/cmd_tast.h \
+ msg_function/../frame/../config/config.h msg_function/../config/config.h
+msg_function/client_msg_sent.h:
+msg_function/../frame/cmd_tast.h:
+msg_function/../frame/../config/config.h:
+msg_function/../config/config.h:
+msg_function/client_msg_sent.c :
+ msg_function/client_msg_sent.h msg_function/../frame/cmd_tast.h :
+ msg_function/../frame/../config/config.h msg_function/../config/config.h :

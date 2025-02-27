@@ -1,10 +1,8 @@
 main.o: main.c lib.h frame/cmd_tast.h frame/../config/config.h \
  frame/epoll_plug.h frame/pthreadpool.h frame/tast_queue.h \
- frame/tast_queue.h user_table/user_table.h config/config.h \
- network/network_connect.h threadpoll_function/thp_cmd_function.h \
- threadpoll_function/thp_tsf_function.h \
- threadpoll_function/thp_dct_function.h mysql/mysql_io.h mysql/../lib.h \
- frame/server_recv.h frame/pthreadpool.h
+ frame/tast_queue.h config/config.h network/tcp_connect.h \
+ msg_function/client_msg_recv.h msg_function/client_msg_sent.h \
+ transfer_file/thp_tsf_function.h
 lib.h:
 frame/cmd_tast.h:
 frame/../config/config.h:
@@ -12,20 +10,13 @@ frame/epoll_plug.h:
 frame/pthreadpool.h:
 frame/tast_queue.h:
 frame/tast_queue.h:
-user_table/user_table.h:
 config/config.h:
-network/network_connect.h:
-threadpoll_function/thp_cmd_function.h:
-threadpoll_function/thp_tsf_function.h:
-threadpoll_function/thp_dct_function.h:
-mysql/mysql_io.h:
-mysql/../lib.h:
-frame/server_recv.h:
-frame/pthreadpool.h:
+network/tcp_connect.h:
+msg_function/client_msg_recv.h:
+msg_function/client_msg_sent.h:
+transfer_file/thp_tsf_function.h:
 main.c lib.h frame/cmd_tast.h frame/../config/config.h :
  frame/epoll_plug.h frame/pthreadpool.h frame/tast_queue.h :
- frame/tast_queue.h user_table/user_table.h config/config.h :
- network/network_connect.h threadpoll_function/thp_cmd_function.h :
- threadpoll_function/thp_tsf_function.h :
- threadpoll_function/thp_dct_function.h mysql/mysql_io.h mysql/../lib.h :
- frame/server_recv.h frame/pthreadpool.h :
+ frame/tast_queue.h config/config.h network/tcp_connect.h :
+ msg_function/client_msg_recv.h msg_function/client_msg_sent.h :
+ transfer_file/thp_tsf_function.h :

@@ -1,0 +1,9 @@
+msg_function/client_msg_recv.o: msg_function/client_msg_recv.c \
+ msg_function/client_msg_recv.h msg_function/../frame/cmd_tast.h \
+ msg_function/../frame/../config/config.h
+msg_function/client_msg_recv.h:
+msg_function/../frame/cmd_tast.h:
+msg_function/../frame/../config/config.h:
+msg_function/client_msg_recv.c :
+ msg_function/client_msg_recv.h msg_function/../frame/cmd_tast.h :
+ msg_function/../frame/../config/config.h :

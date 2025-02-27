@@ -25,22 +25,25 @@ int server_msg_recv(int fd, int epfd, threadpool* thp_cmd,threadpool* thp_tsf){
 
     //异常情况处理
     if(ret == -1){
-        error(1,errno,"server_msg_recv recv");
+        error(0,errno,"server_msg_recv recv");
         return -1;
-    }else if(ret == 1){
+    }else if(ret == 0){
+        printf(ANSI_COLOR_RED);
         printf("[USER_EXIT]User %d exit\n",fd);
+        printf(ANSI_COLOR_RESET);
         close(fd);
         epoll_mod(epfd,EPOLL_CTL_DEL,EPOLLIN,fd);
         free(recv_t);
         return -1;
     }
     
+    recv_t->peerfd = fd;
     if(recv_t->cmdType == CMD_TYPE_DOWNLOAD ||recv_t->cmdType == CMD_TYPE_UPLOAD||
        recv_t->cmdType == CMD_TYPE_DOWNLOAD_BG){
 
-        tast_queue_push(thp_tsf->q,recv_t);
+        tast_queue_push(thp_tsf->q,(void*)recv_t);
     }else{
-        tast_queue_push(thp_cmd->q,recv_t);
+        tast_queue_push(thp_cmd->q,(void*)recv_t);
     }
 
     return 0;

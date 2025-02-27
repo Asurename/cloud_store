@@ -28,17 +28,17 @@ void* thp_cmd_function(void * arg){
         printf("type:%d\n",t->cmdType);
         switch (t->cmdType) {
         case CMD_TYPE_LS:
-            t->peerfd = 0;
+            t->Is_printf = 1;
             cmd_ls(t,p_mysql);
             break;
 
         case CMD_TYPE_CD:
-            t->peerfd = 0;
+            t->Is_printf = 1;
             cmd_cd(t,p_mysql);
             break;
 
         case CMD_TYPE_PWD:
-            t->peerfd = 0;
+            t->Is_printf = 1;
             cmd_pwd(t,p_mysql);
             break;
 
@@ -55,7 +55,7 @@ void* thp_cmd_function(void * arg){
             break;
 
         case CMD_TYPE_NOTCMD:
-            t->peerfd = 0;
+            t->Is_printf = 1;
             cmd_notcmd(t,p_mysql);
             break;
         case CMD_TYPE_REGIT1:

@@ -1,8 +1,11 @@
 #include "login.h"
+void login_01(cmd_tast* t,int* connect_fd){
 
-int server_login1(cmd_tast *t,MYSQL* p_mysql){
-    return 0;
-} 
-int server_login2(cmd_tast *t,MYSQL* p_mysql){
-    return 0;
 }
+void login_02(cmd_tast* t,int* connect_fd){
+
+}
+void crypt_password(cmd_tast* t,char buf[],int len){
+
+}
+
