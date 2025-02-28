@@ -1,0 +1,11 @@
+各个文件夹里面存放的代码功能如下
+cmd:要进行命令处理的操作
+login_register:登入和注册的代码
+threadpoll_function:所有线程的启动函数都在这里
+config:宏定义参数
+mysql:连接和操作mysql的代码
+tool:一些辅助工具
+frame:构成项目的底层框架的代码和main函数中使用的函数
+network:启动tpc监听的代码
+transfer_file:用于文件传输的代码
+user_table:用于记录登入用户和超时断开连接
