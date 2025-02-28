@@ -3,16 +3,23 @@
 #include "lib.h"
 
 int main(){
+    Config config;
+    if (parse_config("../config/config.json", &config) != 0)
+    {
+        fprintf(stderr, "parser failed\n");
+        return -1;
+    }
+
     //建立网络连接
-    int cmd_fd = tcp_connection_bliud(IP,PORT_CMD);
-    int tsf_fd = tcp_connection_bliud(IP,PORT_TSF);
+    int cmd_fd = tcp_connection_bliud(config.server.ip,config.server.cmd_port);
+    int tsf_fd = tcp_connection_bliud(config.server.ip,config.server.tsf_port);
 
     MYSQL* p_mysql;
-    p_mysql = mysql_disk_connect(MYSQL_IP,MYSQL_PORT,MYSQL_NAME,MYSQL_PASSWD,MYSQL_DB);
+    p_mysql = mysql_disk_connect(config.mysql.ip,config.mysql.port,config.mysql.username,config.mysql.password,config.mysql.database);
 
     //初始化线程池
-    threadpool* thp_cmd = threadpool_init(THP_CMD_NUM);
-    threadpool* thp_tsf = threadpool_init(THP_TSF_NUM);
+    threadpool* thp_cmd = threadpool_init(config.thread_pool.cmd_num);
+    threadpool* thp_tsf = threadpool_init(config.thread_pool.tsf_num);
     threadpool* thp_dct = threadpool_init(1);
     struct user_table *ut = user_table_init();
 

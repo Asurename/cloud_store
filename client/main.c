@@ -1,12 +1,20 @@
 #include "lib.h"
 
 int main(){
+
+    Config config;
+    if (parse_config("../config/config.json", &config) != 0)
+    {
+        fprintf(stderr, "parser failed\n");
+        return -1;
+    }
+
     //与服务器建立连接
-    int cmd_fd = tcp_connect(IP,PORT_CMD);
+    int cmd_fd = tcp_connect(config.client.ip,config.client.cmd_port);
 
 
     //创建文件接收线程池
-    threadpool* thp_tsf = threadpool_init(1);
+    threadpool* thp_tsf = threadpool_init(config.thread_pool.tsf_num);
     threadpool_start(thp_tsf,thp_tsf_function,(void*)thp_tsf->q);
 
 

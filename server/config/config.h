@@ -1,8 +1,37 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+#include <func.h>
+#include <cjson/cJSON.h>
+
+typedef struct {
+    char ip[128];
+    int cmd_port;
+    int tsf_port;
+} ServerConfig;
+
+typedef struct {
+    int cmd_num;
+    int tsf_num;
+} ThreadPoolConfig;
+
+typedef struct {
+    char ip[128];
+    int port;
+    char username[64];
+    char password[64];
+    char database[64];
+} MySQLConfig;
+
+typedef struct {
+    ServerConfig server;
+    ThreadPoolConfig thread_pool;
+    MySQLConfig mysql;
+} Config;
+
+
 //服务器监听IP与端口
-#define IP "10.1.24.17"
+#define IP "192.168.182.130"
 #define PORT_CMD 13333
 #define PORT_TSF 12222
 
