@@ -1,5 +1,0 @@
-transfer_file/thp_tsf_function.o: transfer_file/thp_tsf_function.c \
- transfer_file/thp_tsf_function.h
-transfer_file/thp_tsf_function.h:
-transfer_file/thp_tsf_function.c :
- transfer_file/thp_tsf_function.h :
