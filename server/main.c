@@ -4,7 +4,7 @@
 
 int main(){
     Config config;
-    if (parse_config("../config/config.json", &config) != 0)
+    if (parse_config("config/config.json", &config) != 0)
     {
         fprintf(stderr, "parser failed\n");
         return -1;

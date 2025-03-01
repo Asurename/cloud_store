@@ -4,6 +4,7 @@
 #include <func.h>
 #include <cjson/cJSON.h>
 
+
 typedef struct {
     char ip[128];
     int cmd_port;
@@ -31,7 +32,7 @@ typedef struct {
 
 
 //服务器监听IP与端口
-#define IP "192.168.182.130"
+#define IP "10.1.27.255"
 #define PORT_CMD 13333
 #define PORT_TSF 12222
 
@@ -55,4 +56,7 @@ typedef struct {
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
+
+ char *read_file(const char *filename);
+ int parse_config(const char *filename, Config *config);
 #endif
