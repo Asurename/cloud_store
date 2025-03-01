@@ -1,9 +1,0 @@
-login_register/register.o: login_register/register.c \
- login_register/register.h login_register/../frame/cmd_tast.h \
- login_register/../frame/../config/config.h
-login_register/register.h:
-login_register/../frame/cmd_tast.h:
-login_register/../frame/../config/config.h:
-login_register/register.c :
- login_register/register.h login_register/../frame/cmd_tast.h :
- login_register/../frame/../config/config.h :
