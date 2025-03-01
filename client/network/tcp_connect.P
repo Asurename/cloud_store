@@ -1,3 +1,0 @@
-network/tcp_connect.o: network/tcp_connect.c network/tcp_connect.h
-network/tcp_connect.h:
-network/tcp_connect.c network/tcp_connect.h :
