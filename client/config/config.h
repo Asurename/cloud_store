@@ -33,4 +33,8 @@ typedef struct {
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
+
+char *read_file(const char *filename);
+int parse_config(const char *filename, Config *config);
+
 #endif
