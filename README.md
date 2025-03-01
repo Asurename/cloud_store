@@ -3,12 +3,13 @@
 mysql相关不需要改，我们的mysql服务器是在云端的
 
 新增Cjson第三方库,安装后才能编译通过
-git clone https://github.com/DaveGamble/cJSON.git
-cd cJSON
-mkdir build
-cd build
-cmake ..
-make
-sudo make install
+git clone https://github.com/DaveGamble/cJSON.git  
+cd cJSON  
+mkdir build  
+cd build  
+cmake ..  
+make  
+sudo make install  
 
-安装后链接阶段加上-lcson
+做第一步的时候，不要在server或者client文件夹里面做  
+编译通过之后，记得去config/config.json里面修改ip  
