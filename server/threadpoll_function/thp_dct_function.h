@@ -5,7 +5,7 @@
 #define TIMEOUT_ARRAY 30
 
 extern pthread_mutex_t timeout_index_mutex;
-int netfdArray[TIMEOUT_ARRAY][TIMEOUT_MAX];
+extern int netfdArray[TIMEOUT_ARRAY][TIMEOUT_MAX];
 extern int  timeoutArrayIndex;
 
 void* thp_dct_function(void* arg);

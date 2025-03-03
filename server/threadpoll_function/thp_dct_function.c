@@ -2,6 +2,7 @@
 
 pthread_mutex_t timeout_index_mutex = PTHREAD_MUTEX_INITIALIZER;
 int timeoutArrayIndex = 0;
+int netfdArray[TIMEOUT_ARRAY][TIMEOUT_MAX];
 
 int timeout_array_add(int (*netfdArray)[1024], user_table_t *userTable, int timeoutArrayIndex, int user_fd)
 {
@@ -59,7 +60,7 @@ int timeout_array_change(int (*netfdArray)[1024], user_table_t *userTable,int ti
 {
     printf("Thread %ld: Changing user_fd %d to timeoutArrayIndex %d\n", pthread_self(), user_fd, timeoutArrayIndex);
     int idx = user_table_find(user_fd, userTable);
-    printf("------------------index : %d\n",idx);
+    //printf("------------------index : %d\n",idx);
     if (idx == -1 || idx < 0 || idx >= TIMEOUT_ARRAY) {
         fprintf(stderr, "Invalid user_fd %d or index %d\n", user_fd, idx);
         return -1;
