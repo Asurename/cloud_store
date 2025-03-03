@@ -10,12 +10,13 @@ int server_user_recv(int listenfd, int epfd, MYSQL* p_mysql,struct user_table * 
     socklen_t client_addr_len = sizeof(client_addr);
     int fd = accept(listenfd,(struct sockaddr*)&client_addr,&client_addr_len);
     printf(ANSI_COLOR_CYAN);
+    syslog(LOG_INFO,"[NEW_USER]Wellcome user:%d\n",fd);
     printf("[NEW_USER]Wellcome user:%d\n",fd);
     printf(ANSI_COLOR_RESET);
 
     pthread_mutex_lock(&timeout_index_mutex);
     int current_index = timeoutArrayIndex;
-    printf("timeoutArrayIndex : %d \n",timeoutArrayIndex);
+    //printf("timeoutArrayIndex : %d \n",timeoutArrayIndex);
     pthread_mutex_unlock(&timeout_index_mutex);
     timeout_array_add(netfdArray, userTable, current_index, fd);
 
@@ -35,6 +36,7 @@ int server_msg_recv(int fd, int epfd, threadpool* thp_cmd,threadpool* thp_tsf,st
         return -1;
     }else if(ret == 0){
         printf(ANSI_COLOR_RED);
+        syslog(LOG_INFO,"[USER_EXIT]User %d exit\n",fd);
         printf("[USER_EXIT]User %d exit\n",fd);
         printf(ANSI_COLOR_RESET);
         close(fd);

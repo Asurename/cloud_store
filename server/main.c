@@ -3,9 +3,13 @@
 #include "lib.h"
 
 int main(){
+
+    openlog("server::", LOG_PID|LOG_CONS, LOG_LOCAL0);
+
     Config config;
     if (parse_config("config/config.json", &config) != 0)
     {
+        syslog(LOG_ERR,"parser failed\n");
         fprintf(stderr, "parser failed\n");
         return -1;
     }
@@ -35,6 +39,7 @@ int main(){
 
     int recv_num;
     sleep(1);
+    syslog(LOG_INFO,"[System]The server is ready...\n");
     printf("[System]The server is ready...\n");
     while(1){
         recv_num = epoll_wait(ep_fd,recv_events,RECV_EVENTS_NUM,-1);
