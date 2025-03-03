@@ -27,14 +27,20 @@ int main(){
     threadpool* thp_dct = threadpool_init(1);
     struct user_table *ut = user_table_init();
 
+    // 线程池传入参数
+    queue_and_mysql_t* qm = (queue_and_mysql_t*)malloc(sizeof(queue_and_mysql_t));
+    qm->q = thp_tsf->q;
+    qm->p_mysql = p_mysql;
+    
     //线程池启动
     threadpool_start(thp_cmd,thp_cmd_function,(void*)thp_cmd->q);
-    threadpool_start(thp_tsf,thp_tsf_function,(void*)thp_tsf->q);
+    threadpool_start(thp_tsf,thp_tsf_function,(void*)qm);
     threadpool_start(thp_dct,thp_dct_function,(void*)ut);
 
     //建立epoll监听
     int ep_fd = epoll_create1(0);
     epoll_mod(ep_fd,EPOLL_CTL_ADD,EPOLLIN,cmd_fd);
+    epoll_mod(ep_fd,EPOLL_CTL_ADD,EPOLLIN,tsf_fd);
     struct epoll_event recv_events[RECV_EVENTS_NUM];
 
     int recv_num;
@@ -48,9 +54,10 @@ int main(){
                 //进行新用户的接收
                 server_user_recv(cmd_fd,ep_fd,p_mysql,ut);
             }else{
-                server_msg_recv(recv_events[i].data.fd,ep_fd,thp_cmd,thp_tsf,ut);
+                server_msg_recv(recv_events[i].data.fd,ep_fd,thp_cmd,thp_tsf,ut, tsf_fd);
             }
         }
     }
 }
+
 
