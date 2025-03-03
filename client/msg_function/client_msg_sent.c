@@ -5,45 +5,34 @@
 
 CMD command_type(char* token);
 
-//切割函数
-void input_to_cmd_tast(char* input,cmd_tast* t){
-    char cmd_buf[MAX_CMD_SIZE];
-    char arg_buf[MAX_CMD_SIZE] = {0};
-    
-    // 复制输入避免修改原始数据
-    strncpy(cmd_buf, input, MAX_CMD_SIZE-1);
-    cmd_buf[MAX_CMD_SIZE-1] = '\0';
 
-    // 分割命令和参数
-    char* space = strchr(cmd_buf, ' ');
-    if (space != NULL) {
-        *space = '\0';          // 截断命令部分
-        strncpy(arg_buf, space+1, MAX_CMD_SIZE-1);
-        arg_buf[MAX_CMD_SIZE-1] = '\0'; // 确保终止符
-    }
-
-    // 设置结构体成员
-    t->cmdType = command_type(cmd_buf);
-    strncpy(t->content, arg_buf, MAX_CMD_SIZE-1);
-    t->content[MAX_CMD_SIZE-1] = '\0';
-}
-
-int client_msg_sent(int fd, threadpool* thp_tsf){
+int client_msg_sent(int fd, threadpool* thp_tsf, char* current_path){
     //初始化用户输入缓冲区
-    char input[MAX_CMD_SIZE];
-    memset(input,0,MAX_CMD_SIZE);
+    char buffer1[MAX_CMD_SIZE];
+    char buffer2[MAX_CMD_SIZE];
+    memset(buffer1,0,MAX_CMD_SIZE);
+    memset(buffer1,0,MAX_CMD_SIZE);
 
     //初始化cmd_tast结构体
     cmd_tast *t = (cmd_tast*)malloc(sizeof(cmd_tast));
+    memset(t,0,sizeof(cmd_tast));
 
-    // 读取整行输入（包含空格）
-    if (!fgets(input, MAX_CMD_SIZE, stdin)) {
-        error(1, errno, "fgets failed");
+    //接收用户输入 
+    fgets(buffer1, MAX_CMD_SIZE, stdin);
+    buffer1[strcspn(buffer1, "\n")] = '\0';  // 去除换行符
+    
+    //填充content
+    strncpy(t->content, buffer1, strlen(buffer1));
+    //填充cmdType
+    char* token = strtok(buffer1, " ");
+    if(token != NULL) {
+        strncpy(buffer2, token, MAX_CMD_SIZE-1);
+        buffer2[MAX_CMD_SIZE-1] = '\0';  // 确保终止符
     }
-    input[strcspn(input, "\n")] = '\0'; // 去除换行符
-
-    //切割函数，把接受到的字符串input解析并装入到cmd_tast结构体中
-    input_to_cmd_tast(input, t);
+    t->cmdType = command_type(buffer2);
+    //填充path
+    strncpy(t->path, current_path, sizeof(t->path)-1);
+    t->path[sizeof(t->path)-1] = '\0';
 
 
     //发送cmd_tast给服务器
@@ -90,4 +79,5 @@ CMD command_type(char* token) {
     }
     return CMD_TYPE_NOTCMD;
 }
+
 

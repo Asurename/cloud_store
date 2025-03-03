@@ -1,5 +1,8 @@
 #include "lib.h"
 
+char current_path[512];
+strcpy(crrr_path,"/james");
+
 int main(){
 
     Config config;
@@ -26,6 +29,8 @@ int main(){
     epoll_mod(epfd,EPOLL_CTL_ADD,EPOLLIN,STDIN_FILENO);
     
     int recv_num;
+
+
     sleep(1);
     printf(ANSI_COLOR_CYAN);
     printf("[System]wellcome!\n");
@@ -45,8 +50,9 @@ int main(){
                 clinet_msg_recv(cmd_fd);
             }else if(recv_events[i].data.fd == STDIN_FILENO){
                 //进入消息发送
-                client_msg_sent(cmd_fd, thp_tsf);
+                client_msg_sent(cmd_fd, thp_tsf, current_path);
             }
         }
     }
 }
+
