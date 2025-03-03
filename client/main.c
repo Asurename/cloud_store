@@ -45,7 +45,7 @@ int main(){
                 clinet_msg_recv(cmd_fd);
             }else if(recv_events[i].data.fd == STDIN_FILENO){
                 //进入消息发送
-                client_msg_sent(cmd_fd);
+                client_msg_sent(cmd_fd, thp_tsf);
             }
         }
     }
