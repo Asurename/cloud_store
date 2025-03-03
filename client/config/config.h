@@ -20,9 +20,9 @@ typedef struct {
 } Config;
 
 //服务器监听IP与端口
-#define IP "192.168.182.130"
-#define PORT_CMD 13333
-#define PORT_TSF 12222
+// #define IP "192.168.182.130"
+// #define PORT_CMD 13333
+// #define PORT_TSF 12222
 
 //epoll监听最大接受数量
 #define RECV_EVENTS_NUM 4096

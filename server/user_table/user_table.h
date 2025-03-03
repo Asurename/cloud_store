@@ -3,12 +3,23 @@
 
 #include <stdio.h>
 
-//用户表的定义
-struct user_table{
-    int a;    
-};
+#define USER_TABLE_MAX 4096
 
-struct user_table* user_table_init();
-int user_table_add(int user_fd,struct user_table *ut);
-int user_table_erase(int user_fd,struct user_table *ut);
+typedef struct user_s
+{
+    int user_fd;
+    int user_index;
+} user_t;
+
+// 用户表的定义
+typedef struct user_table
+{
+    user_t table[USER_TABLE_MAX];
+} user_table_t;
+
+struct user_table *user_table_init();
+int user_table_add(int user_fd,int timeoutArrayIndex, user_table_t* ut);
+int user_table_erase(int user_fd, user_table_t* ut);
+int user_table_change(int user_fd,int timeoutArrayIndex, user_table_t* ut);
+int user_table_find(int user_fd, user_table_t* ut);
 #endif

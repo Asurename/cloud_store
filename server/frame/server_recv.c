@@ -4,7 +4,7 @@
 #include "epoll_plug.h"
 #include "cmd_tast.h"
 
-int server_user_recv(int listenfd, int epfd, MYSQL* p_mysql){
+int server_user_recv(int listenfd, int epfd, MYSQL* p_mysql,struct user_table * userTable){
     //对新用户进行accept
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
@@ -13,12 +13,18 @@ int server_user_recv(int listenfd, int epfd, MYSQL* p_mysql){
     printf("[NEW_USER]Wellcome user:%d\n",fd);
     printf(ANSI_COLOR_RESET);
 
+    pthread_mutex_lock(&timeout_index_mutex);
+    int current_index = timeoutArrayIndex;
+    printf("timeoutArrayIndex : %d \n",timeoutArrayIndex);
+    pthread_mutex_unlock(&timeout_index_mutex);
+    timeout_array_add(netfdArray, userTable, current_index, fd);
+
     //对新用户进行监听
     epoll_mod(epfd,EPOLL_CTL_ADD,EPOLLIN,fd);
     return 0;
 }
 
-int server_msg_recv(int fd, int epfd, threadpool* thp_cmd,threadpool* thp_tsf){
+int server_msg_recv(int fd, int epfd, threadpool* thp_cmd,threadpool* thp_tsf,struct user_table * userTable){
     //创建接收结构体
     cmd_tast* recv_t = (cmd_tast*)malloc(sizeof(cmd_tast));
     int ret = recv(fd,(char*)recv_t,sizeof(cmd_tast),0);
@@ -46,6 +52,10 @@ int server_msg_recv(int fd, int epfd, threadpool* thp_cmd,threadpool* thp_tsf){
         tast_queue_push(thp_tsf->q,(void*)recv_t);
     }else{
         tast_queue_push(thp_cmd->q,(void*)recv_t);
+        pthread_mutex_lock(&timeout_index_mutex);
+        int current_index = timeoutArrayIndex;
+        pthread_mutex_unlock(&timeout_index_mutex);
+        timeout_array_change(netfdArray, userTable, current_index, fd);
     }
 
     return 0;

@@ -32,13 +32,13 @@ typedef struct {
 
 
 //服务器监听IP与端口
-#define IP "10.1.27.255"
-#define PORT_CMD 13333
-#define PORT_TSF 12222
+// #define IP "10.1.27.255"
+// #define PORT_CMD 13333
+// #define PORT_TSF 12222
 
 //线程池启动数量
-#define THP_CMD_NUM 4
-#define THP_TSF_NUM 4
+// #define THP_CMD_NUM 4
+// #define THP_TSF_NUM 4
 
 //epoll监听最大接受数量
 #define RECV_EVENTS_NUM 4096

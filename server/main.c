@@ -41,9 +41,9 @@ int main(){
         for(int i = 0;i<recv_num;i++){
             if(recv_events[i].data.fd == cmd_fd){
                 //进行新用户的接收
-                server_user_recv(cmd_fd,ep_fd,p_mysql);
+                server_user_recv(cmd_fd,ep_fd,p_mysql,ut);
             }else{
-                server_msg_recv(recv_events[i].data.fd,ep_fd,thp_cmd,thp_tsf);
+                server_msg_recv(recv_events[i].data.fd,ep_fd,thp_cmd,thp_tsf,ut);
             }
         }
     }
