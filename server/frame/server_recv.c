@@ -24,7 +24,7 @@ int server_user_recv(int listenfd, int epfd, MYSQL* p_mysql,struct user_table * 
     return 0;
 }
 
-int server_msg_recv(int fd, int epfd, threadpool* thp_cmd,threadpool* thp_tsf,struct user_table * userTable){
+int server_msg_recv(int fd, int epfd, threadpool* thp_cmd,threadpool* thp_tsf,struct user_table * userTable, int tsf_fd){
     //创建接收结构体
     cmd_tast* recv_t = (cmd_tast*)malloc(sizeof(cmd_tast));
     int ret = recv(fd,(char*)recv_t,sizeof(cmd_tast),0);
@@ -48,7 +48,7 @@ int server_msg_recv(int fd, int epfd, threadpool* thp_cmd,threadpool* thp_tsf,st
     //把短命令和长命令扔进不同的任务队列，不同的线程池会去处理
     if(recv_t->cmdType == CMD_TYPE_DOWNLOAD ||recv_t->cmdType == CMD_TYPE_UPLOAD||
        recv_t->cmdType == CMD_TYPE_DOWNLOAD_BG){
-
+        recv_t->peerfd = tsf_fd;
         tast_queue_push(thp_tsf->q,(void*)recv_t);
     }else{
         tast_queue_push(thp_cmd->q,(void*)recv_t);
