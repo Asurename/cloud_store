@@ -27,23 +27,21 @@ int server_user_recv(int listenfd, int epfd, MYSQL* p_mysql,struct user_table * 
 int server_msg_recv(int fd, int epfd, threadpool* thp_cmd,threadpool* thp_tsf,struct user_table * userTable, int tsf_fd){
     //创建接收结构体
     cmd_tast* recv_t = (cmd_tast*)malloc(sizeof(cmd_tast));
-    int ret = recv(fd,(char*)recv_t,sizeof(cmd_tast),0);
-
-    //异常情况处理
+    int ret = recv(fd,(char*)recv_t,sizeof(cmd_tast),0);    
+                 //异常情况处理
     if(ret == -1){
-        error(0,errno,"server_msg_recv recv");
-        return -1;
+         error(0,errno,"server_msg_recv recv");
+         return -1;
     }else if(ret == 0){
-        printf(ANSI_COLOR_RED);
-        printf("[USER_EXIT]User %d exit\n",fd);
-        printf(ANSI_COLOR_RESET);
-        close(fd);
+         printf(ANSI_COLOR_RED);
+         printf("[USER_EXIT]User %d exit\n",fd);
+         printf(ANSI_COLOR_RESET);
+         close(fd);
         epoll_mod(epfd,EPOLL_CTL_DEL,EPOLLIN,fd);
         free(recv_t);
         return -1;
     }
     
-
     recv_t->peerfd = fd;
     //把短命令和长命令扔进不同的任务队列，不同的线程池会去处理
     if(recv_t->cmdType == CMD_TYPE_DOWNLOAD ||recv_t->cmdType == CMD_TYPE_UPLOAD||
