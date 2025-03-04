@@ -6,18 +6,60 @@ void handl_upload(int socketfd){
     //接受上传文件
     printf("正在接受来自客户端xxx的文件...\n");//可加客户ip
 
-    FILE *fp;
-    char buffer[4096] = {0};
-    fp = fopen("../fileshouse_server/500mb_file", "wb");
-    if (fp == NULL) {
+    // 接收文件大小
+    long file_size;
+    if (recv(socketfd, &file_size, sizeof(file_size), 0) <= 0) {
+        perror("Failed to receive file size");
+        close(socketfd);
+    }
+    printf("File size: %ld bytes\n", file_size);
+
+    // 打开目标文件
+    const char *output_file = "../fileshouse_server/500mb_file";
+    int output_fd = open(output_file, O_RDWR | O_CREAT, 0644);
+    if (output_fd < 0) {
         perror("File open failed");
+        close(socketfd);
     }
-    int bytes_received;
-    while ((bytes_received = recv(socketfd, buffer, 4096, 0)) > 0) {
-        fwrite(buffer, 1, bytes_received, fp);
+
+    // 获取文件当前大小（用于断点续传）
+    off_t offset = lseek(output_fd, 0, SEEK_END);
+    printf("Resuming upload from offset: %ld\n", offset);
+
+    // 发送起始偏移量给客户端
+    send(socketfd, &offset, sizeof(offset), 0);
+
+    // 接收文件内容
+    long total_received = offset;
+    char buffer[4096];
+    while (total_received < file_size) {
+        int bytes_to_read = (file_size - total_received > 4096) ? 4096 : (file_size - total_received);
+        int bytes_received = recv(socketfd, buffer, bytes_to_read, 0);
+        if (bytes_received <= 0) {
+            perror("recv failed");
+            break;
+        }
+
+        // 写入文件
+        lseek(output_fd, total_received, SEEK_SET);
+        write(output_fd, buffer, bytes_received);
+
+        total_received += bytes_received;
+
+        // 更新进度条
+        printf("Received: %ld / %ld bytes (%.2f%%)\r", total_received, file_size, (double)total_received / file_size * 100);
+        fflush(stdout);
     }
-    printf("File received and saved as 'received_file.txt'\n");
+    printf("\nFile received and saved as '%s'\n", output_file);
+
+    // 关闭文件和连接
+    close(output_fd);
     close(socketfd);
+
+
+
+
+
     printf("客户端xxx上传文件完成，断开数据TCP连接");
 }
 

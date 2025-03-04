@@ -25,34 +25,6 @@ void print_progress(double percentage) {
     fflush(stdout);
 }
 
-void handl_upload(int socketfd) {
-         //上传文件
-        printf("即将上传...\n");
-        FILE *fp;
-        char buffer[4096] = {0};
-        fp = fopen("../fileshouse_client/500mb_file", "rb");
-        if (fp == NULL) {
-            perror("File open failed");
-            
-        }
-
-        // 获取文件大小
-        fseek(fp, 0, SEEK_END);
-        long file_size = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
-
-        int bytes_read;
-        long total_sent = 0;
-        while ((bytes_read = fread(buffer, 1, 4096, fp)) > 0) {
-            send(socketfd, buffer, bytes_read, 0);
-            total_sent += bytes_read;
-            print_progress((double)total_sent / file_size);
-        }
-        printf("\nFile sent successfully.\n");
-        close(socketfd);
-        printf("上传成功.\n");
-
-}
 
 off_t read_offset(const char *offset_file) {
     FILE *fp = fopen(offset_file, "rb");
@@ -69,6 +41,108 @@ void save_offset(const char *offset_file, off_t offset) {
     fwrite(&offset, sizeof(offset), 1, fp);
     fclose(fp);
 }
+
+
+void handl_upload(int socketfd) {
+         //上传文件
+        printf("即将上传...\n");
+
+        const char *input_file = "../fileshouse_client/500mb_file";
+        const char *offset_file = "../fileshouse_client/upload_offset.dat"; // 偏移量文件路径
+        
+
+        // 打开输入文件
+        int input_fd = open(input_file, O_RDONLY);
+        if (input_fd < 0) {
+            perror("File open failed");
+            close(socketfd);
+        }
+
+        // 获取文件大小
+        struct stat file_stat;
+        if (fstat(input_fd, &file_stat) < 0) {
+            perror("fstat failed");
+            close(input_fd);
+            close(socketfd);
+        }
+        long file_size = file_stat.st_size;
+
+        // 发送文件大小给服务端
+        if (send(socketfd, &file_size, sizeof(file_size), 0) <= 0) {
+            perror("Failed to send file size");
+            close(input_fd);
+            close(socketfd);
+        }
+
+        // 接收服务端请求的起始偏移量
+        off_t offset;
+        if (recv(socketfd, &offset, sizeof(offset), 0) <= 0) {
+            perror("Failed to receive offset");
+            close(input_fd);
+            close(socketfd);
+        }
+        printf("Resuming upload from offset: %ld\n", offset);
+
+        // 读取断点偏移量
+        off_t local_offset = read_offset(offset_file);
+        if (local_offset > offset) {
+            offset = local_offset; // 使用本地记录的偏移量
+        }
+
+        // 定位到文件的起始偏移量
+        lseek(input_fd, offset, SEEK_SET);
+
+        // 上传文件内容
+        long total_sent = offset;
+        char buffer[4096];
+        while (total_sent < file_size) {
+            if (should_exit) break; // 如果捕获到退出信号，退出循环
+
+            int bytes_to_send = (file_size - total_sent > 4096) ? 4096 : (file_size - total_sent);
+            int bytes_read = read(input_fd, buffer, bytes_to_send);
+            if (bytes_read <= 0) {
+                perror("read failed");
+                break;
+            }
+
+            int bytes_sent = send(socketfd, buffer, bytes_read, 0);
+            if (bytes_sent <= 0) {
+                perror("send failed");
+                break;
+            }
+
+            total_sent += bytes_sent;
+
+            // 更新进度条
+            print_progress((double)total_sent / file_size);
+
+            // 每隔一定数据量保存一次偏移量
+            if (total_sent - last_saved_offset >= SAVE_OFFSET_THRESHOLD) {
+                save_offset(offset_file, total_sent);
+                last_saved_offset = total_sent;
+            }
+        }
+
+        // 确保退出前保存最后一次偏移量
+        if (total_sent > last_saved_offset) {
+            save_offset(offset_file, total_sent);
+        }
+
+        // 删除偏移量文件（如果上传完成）
+        if (total_sent >= file_size) {
+            remove(offset_file);
+        }
+
+        printf("\nFile uploaded successfully.\n");
+
+        // 关闭文件和连接
+        close(input_fd);
+        close(socketfd);
+
+        printf("上传成功.\n");
+
+}
+
 
 void handl_download(int socketfd) {
         //下载文件
