@@ -1,5 +1,6 @@
 //服务端
 #include "../lib.h"
+#include <sys/sendfile.h>
 
 void handl_upload(int socketfd){
     //接受上传文件
@@ -23,29 +24,43 @@ void handl_upload(int socketfd){
 void handl_download(int socketfd){
          //发送下载文件
         printf("下载处理中...\n");
-        
-        char buffer[4096] = {0};
-        FILE *fp;
-        fp = fopen("../fileshouse_server/1000mb_file", "rb");
-        if (fp == NULL) {
+
+        // 打开要发送的文件
+        const char *file_path = "../fileshouse_server/1000mb_file";
+        int file_fd = open(file_path, O_RDONLY);
+        if (file_fd < 0) {
             perror("File open failed");
         }
-        // 获取文件大小
-        fseek(fp, 0, SEEK_END);
-        long file_size = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
 
+        // 获取文件大小
+        struct stat file_stat;
+        if (fstat(file_fd, &file_stat) < 0) {
+            perror("fstat failed");
+            exit(EXIT_FAILURE);
+        }
+        off_t file_size = file_stat.st_size;
         // 发送文件大小给客户端
         send(socketfd, &file_size, sizeof(file_size), 0);
 
-        // 发送文件内容
-        int bytes_read;
-        while ((bytes_read = fread(buffer, 1, 4096, fp)) > 0) {
-            send(socketfd, buffer, bytes_read, 0);
+        // 接收客户端请求的起始偏移量
+        off_t offset;
+        recv(socketfd, &offset, sizeof(offset), 0);
+        printf("Client requested to resume from offset: %ld\n", offset);
+
+        // 使用 sendfile 发送文件内容
+        ssize_t sent_bytes = sendfile(socketfd, file_fd, &offset, file_size - offset);
+        if (sent_bytes < 0) {
+            perror("Sendfile failed");
+        } else {
+            printf("File sent successfully (%ld bytes).\n", sent_bytes);
         }
 
-        printf("File sent successfully.\n");
-        close(socketfd);    
+        // 关闭文件和连接
+        close(file_fd);
+        close(socketfd);
+
+
+
         printf("客户端xx下载任务完成,断开数据TCP连接\n");
 
 }

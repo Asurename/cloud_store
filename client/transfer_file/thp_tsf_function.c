@@ -1,6 +1,17 @@
 //客户端
 #include "thp_tsf_function.h"
 
+#define SAVE_OFFSET_THRESHOLD (10 * 1024 * 1024) // 每 1MB 保存一次偏移量
+
+int should_exit = 0; // 标志变量，用于捕获退出信号
+off_t last_saved_offset = 0; // 上次保存的偏移量
+void handle_signal(int sig) {
+    if (sig == SIGINT || sig == SIGTERM) {
+        printf("\nCaught signal %d, saving offset and exiting...\n", sig);
+        should_exit = 1;
+    }
+}
+
 void print_progress(double percentage) {
     int bar_width = 50;
     printf("[");
@@ -43,35 +54,110 @@ void handl_upload(int socketfd) {
 
 }
 
+off_t read_offset(const char *offset_file) {
+    FILE *fp = fopen(offset_file, "rb");
+    if (!fp) return 0;
+    off_t offset;
+    fread(&offset, sizeof(offset), 1, fp);
+    fclose(fp);
+    return offset;
+}
+
+void save_offset(const char *offset_file, off_t offset) {
+    FILE *fp = fopen(offset_file, "wb");
+    if (!fp) return;
+    fwrite(&offset, sizeof(offset), 1, fp);
+    fclose(fp);
+}
+
 void handl_download(int socketfd) {
         //下载文件
         printf("即将下载...\n");
 
-        FILE *fp;
-        char buffer[4096] = {0};
-        // 接收文件大小
-        long file_size;
-        recv(socketfd, &file_size, sizeof(file_size), 0);
-        // 打开文件以写入
-        fp = fopen("../fileshouse_client/1000mb_file", "wb");
-        if (fp == NULL) {
+        // 打开输出文件
+        const char *output_file = "../fileshouse_client/1000mb_file";
+        int output_fd = open(output_file, O_RDWR | O_CREAT, 0644);
+        if (output_fd < 0) {
             perror("File open failed");
         }
+
+        const char *offset_file = "../fileshouse_client/download_offset.dat";
+        // 读取断点偏移量
+        off_t offset = read_offset(offset_file);
+        printf("Resuming download from offset: %ld\n", offset);
+
+        // 发送起始偏移量给服务端
+        send(socketfd, &offset, sizeof(offset), 0);
+
+        // 接收文件大小
+        long file_size;
+        if (recv(socketfd, &file_size, sizeof(file_size), 0) <= 0) {
+            perror("Failed to receive file size");
+            close(output_fd);
+            close(socketfd);
+        }
+
+        
+        // 调整文件大小以容纳完整文件
+        if (ftruncate(output_fd, file_size) < 0) {
+            perror("ftruncate failed");
+            close(output_fd);
+        }
+
+        // 使用 mmap 映射文件到内存
+        void *file_map = mmap(NULL, file_size, PROT_WRITE, MAP_SHARED, output_fd, 0);
+        if (file_map == MAP_FAILED) {
+            perror("mmap failed");
+            close(output_fd);
+        }
+
+
+
         // 接收文件内容
-        long total_received = 0;
-        int bytes_received;
-        while ((bytes_received = recv(socketfd, buffer,4096, 0)) > 0) {
-            fwrite(buffer, 1, bytes_received, fp);
+        char buffer[4096] = {0};
+        long total_received = offset;
+        while (total_received < file_size) {
+            if (should_exit) break; // 如果捕获到退出信号，退出循环
+
+            int bytes_to_read = (file_size - total_received > 4096) ? 4096 : (file_size - total_received);
+             int bytes_received = recv(socketfd, (char *)file_map + total_received, bytes_to_read, 0);
+            if (bytes_received <= 0) {
+                perror("recv failed");
+                break;
+            }
+
+
             total_received += bytes_received;
 
             // 更新进度条
             print_progress((double)total_received / file_size);
 
-            if (total_received >= file_size) break;
+            // 每隔一定数据量保存一次偏移量
+            if (total_received - last_saved_offset >= SAVE_OFFSET_THRESHOLD) {
+                save_offset(offset_file, total_received);
+                last_saved_offset = total_received;
+            }
         }
-        printf("\nFile received and saved as '1000mb_file'\n");
+
+        // 确保退出前保存最后一次偏移量
+        if (total_received > last_saved_offset) {
+            save_offset(offset_file, total_received);
+        }
+
+        // 删除偏移量文件（如果下载完成）
+        if (total_received >= file_size) {
+            remove(offset_file);
+        }
+
+
+        // 关闭文件和连接
+        munmap(file_map, file_size);
+        close(output_fd);
         close(socketfd);
-        printf("下载任务完成，断开数据TCP连接。\n");
+
+
+
+        printf("\n下载任务完成，断开数据TCP连接。\n");
 }
 /*
     介绍结构体t:
