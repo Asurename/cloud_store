@@ -40,7 +40,7 @@ int cmd_ls(cmd_tast *t, MYSQL *p_mysql)
             continue;
         }
         strcat(t->content, row[2]);
-        strcat(t->content, "/   ");
+        strcat(t->content, "   ");
         continue;
         printf("\n");
     }
