@@ -40,7 +40,6 @@ int main(){
     //建立epoll监听
     int ep_fd = epoll_create1(0);
     epoll_mod(ep_fd,EPOLL_CTL_ADD,EPOLLIN,cmd_fd);
-    epoll_mod(ep_fd,EPOLL_CTL_ADD,EPOLLIN,tsf_fd);
     struct epoll_event recv_events[RECV_EVENTS_NUM];
 
     int recv_num;

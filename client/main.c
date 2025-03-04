@@ -1,9 +1,9 @@
 #include "lib.h"
 
 char current_path[512];
-strcpy(crrr_path,"/james");
 
 int main(){
+    strcpy(current_path,"/james");
 
     Config config;
     if (parse_config("config/config.json", &config) != 0)
