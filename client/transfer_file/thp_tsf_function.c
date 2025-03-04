@@ -1,34 +1,78 @@
 //客户端
 #include "thp_tsf_function.h"
 
-void handl_upload(cmd_tast* t, int socketfd){
-/* 
-    //1 组装结构体
-        //要解析出文件名
-        //要解析出当前路径
-        //组合出虚拟绝对文件路径 = 当前路径+文件名
-        //计算这个文件哈希值
-        //获取文件大小
-        //以上数据存在一个结构体中
-
-    //2 发送文件哈希值（发送结构体）
-
-    //4 接收服务器返回的哈希值标志
-    if(哈希值不存在){//即文件内容不存在，需要发送文件内容
-        //6 发送文件内容
-
-        //发送完毕就结束线程
+void print_progress(double percentage) {
+    int bar_width = 50;
+    printf("[");
+    int pos = bar_width * percentage;
+    for (int i = 0; i < bar_width; ++i) {
+        if (i < pos) printf("=");
+        else if (i == pos) printf(">");
+        else printf(" ");
     }
-
-    if(哈希值存在){//即文件内容已存在
-        //6 秒传了，什么都不做，结束线程
-    }
-*/
-    
+    printf("] %.2f%%\r", percentage * 100);
+    fflush(stdout);
 }
 
+void handl_upload(int socketfd) {
+         //上传文件
+        printf("即将上传...\n");
+        FILE *fp;
+        char buffer[4096] = {0};
+        fp = fopen("../fileshouse_client/500mb_file", "rb");
+        if (fp == NULL) {
+            perror("File open failed");
+            
+        }
 
+        // 获取文件大小
+        fseek(fp, 0, SEEK_END);
+        long file_size = ftell(fp);
+        fseek(fp, 0, SEEK_SET);
 
+        int bytes_read;
+        long total_sent = 0;
+        while ((bytes_read = fread(buffer, 1, 4096, fp)) > 0) {
+            send(socketfd, buffer, bytes_read, 0);
+            total_sent += bytes_read;
+            print_progress((double)total_sent / file_size);
+        }
+        printf("\nFile sent successfully.\n");
+        close(socketfd);
+        printf("上传成功.\n");
+
+}
+
+void handl_download(int socketfd) {
+        //下载文件
+        printf("即将下载...\n");
+
+        FILE *fp;
+        char buffer[4096] = {0};
+        // 接收文件大小
+        long file_size;
+        recv(socketfd, &file_size, sizeof(file_size), 0);
+        // 打开文件以写入
+        fp = fopen("../fileshouse_client/1000mb_file", "wb");
+        if (fp == NULL) {
+            perror("File open failed");
+        }
+        // 接收文件内容
+        long total_received = 0;
+        int bytes_received;
+        while ((bytes_received = recv(socketfd, buffer,4096, 0)) > 0) {
+            fwrite(buffer, 1, bytes_received, fp);
+            total_received += bytes_received;
+
+            // 更新进度条
+            print_progress((double)total_received / file_size);
+
+            if (total_received >= file_size) break;
+        }
+        printf("\nFile received and saved as '1000mb_file'\n");
+        close(socketfd);
+        printf("下载任务完成，断开数据TCP连接。\n");
+}
 /*
     介绍结构体t:
     t->cmdType: 命令类型
@@ -49,26 +93,20 @@ void* thp_tsf_function(void* arg){
     //从队列中取出任务
     void* t1 = tast_queue_pop(q);//线程一般会在这阻塞和唤醒
     cmd_tast* t = (cmd_tast*)t1;
-    sleep(1);
+    
     //创建新socket，并connect到服务器
     int socketfd = tcp_connect("127.0.0.1", 12222);
     printf("已和服务端子线程函数建立了TCP连接\n");
     //----------------------已和服务端子线程函数建立了TCP连接------------------------------
 
     if(t->cmdType == CMD_TYPE_UPLOAD){
-        //上传文件
-        handl_upload(t, socketfd);
-        printf("上传/下载任务处理中...\n");
-        sleep(1);
+        handl_upload(socketfd);
     }
     if(t->cmdType == CMD_TYPE_DOWNLOAD){
-        //下载文件
-        printf("上传/下载任务处理中...\n");
-        sleep(1);
+        handl_download(socketfd);
+
     }
 
-    close(socketfd);
-    printf("任务完成,断开TCP数据连接\n");
     return 0;
 }
 
