@@ -1,4 +1,5 @@
 #include "login.h"
+#include <stdarg.h>
 // 自定义的error函数
 void error(int status, int err, const char *fmt,...) {
     va_list args;
