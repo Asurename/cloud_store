@@ -20,6 +20,7 @@ void strtok_commend(char *commend, StringStack *stack)
         {
             if (is_string_stack_empty(stack))
             {
+
                 continue;
             }
             pop_string(stack);
@@ -36,7 +37,7 @@ void strtok_commend(char *commend, StringStack *stack)
 }
 void strtok_path(char *path, StringStack *stack)
 {
-    const char delim[] = "/";
+    const char delim[] = "/\n";
     char *token = strtok(path, delim);
     while (token != NULL)
     {
@@ -91,16 +92,6 @@ int cmd_cd(cmd_tast *t, MYSQL *p_mysql)
         return 1;
     }
 
-    // // 获取计数结果
-    // MYSQL_ROW row = mysql_fetch_row(result);
-    // if (row != NULL)
-    // {
-    //     bzero(t->path, sizeof(t->path));
-    //     strcpy(t->path, buf);
-    // }
-    // 获取计数结果
-    // 获取计数结果
-    // 获取计数结果
     MYSQL_ROW row = mysql_fetch_row(result);
     if (row != NULL)
     {
@@ -109,6 +100,7 @@ int cmd_cd(cmd_tast *t, MYSQL *p_mysql)
         if (count == 1)
         {
             t->Is_printf = 0;
+            bzero(t->content, sizeof(t->content));
             bzero(t->path, sizeof(t->path));
             strcpy(t->path, buf);
         }
@@ -116,7 +108,14 @@ int cmd_cd(cmd_tast *t, MYSQL *p_mysql)
         {
             t->Is_printf = 1;
             bzero(t->content, sizeof(t->content));
-            strcpy(t->content, "There is no such file or directory.");
+            if (is_string_stack_empty(&stack) == 1)
+            {
+                strcpy(t->content, "You don't have permissions.");
+            }
+            else
+            {
+                strcpy(t->content, "There is no such file or directory.");
+            }
             bzero(t->path, sizeof(t->path));
             strcpy(t->path, path_temp);
         }
