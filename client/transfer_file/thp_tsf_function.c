@@ -1,5 +1,6 @@
 //客户端
 #include "thp_tsf_function.h"
+#include <mysql/mysql.h>
 
 #define SAVE_OFFSET_THRESHOLD (10 * 1024 * 1024) // 每 1MB 保存一次偏移量
 
@@ -12,19 +13,7 @@ void handle_signal(int sig) {
     }
 }
 
-void print_progress(double percentage) {
-    int bar_width = 50;
-    printf("[");
-    int pos = bar_width * percentage;
-    for (int i = 0; i < bar_width; ++i) {
-        if (i < pos) printf("=");
-        else if (i == pos) printf(">");
-        else printf(" ");
-    }
-    printf("] %.2f%%\r", percentage * 100);
-    fflush(stdout);
-}
-
+void update_progress_bar(long current, long total, clock_t* last_time);
 
 off_t read_offset(const char *offset_file) {
     FILE *fp = fopen(offset_file, "rb");
@@ -35,6 +24,7 @@ off_t read_offset(const char *offset_file) {
     return offset;
 }
 
+
 void save_offset(const char *offset_file, off_t offset) {
     FILE *fp = fopen(offset_file, "wb");
     if (!fp) return;
@@ -43,18 +33,22 @@ void save_offset(const char *offset_file, off_t offset) {
 }
 
 
-void handl_upload(int socketfd) {
+void handl_upload(int socketfd, char* filename) {
          //上传文件
         printf("即将上传...\n");
 
-        const char *input_file = "../fileshouse_client/500mb_file";
-        const char *offset_file = "../fileshouse_client/upload_offset.dat"; // 偏移量文件路径
-        
+        char input_path[512];
+        char offset_path[512];
+        // 构造输入文件路径
+        snprintf(input_path, sizeof(input_path), "../fileshouse_client/%s", filename);
+        // 构造偏移量文件路径
+        snprintf(offset_path, sizeof(offset_path), "../fileshouse_client/%s_upload_offset.dat", filename);
+
 
         // 打开输入文件
-        int input_fd = open(input_file, O_RDONLY);
+        int input_fd = open(input_path, O_RDONLY);
         if (input_fd < 0) {
-            perror("File open failed");
+            perror("文件打开失败");
             close(socketfd);
         }
 
@@ -84,7 +78,7 @@ void handl_upload(int socketfd) {
         printf("Resuming upload from offset: %ld\n", offset);
 
         // 读取断点偏移量
-        off_t local_offset = read_offset(offset_file);
+        off_t local_offset = read_offset(offset_path);
         if (local_offset > offset) {
             offset = local_offset; // 使用本地记录的偏移量
         }
@@ -95,6 +89,7 @@ void handl_upload(int socketfd) {
         // 上传文件内容
         long total_sent = offset;
         char buffer[4096];
+        clock_t last_time = clock();  // 初始化计时器
         while (total_sent < file_size) {
             if (should_exit) break; // 如果捕获到退出信号，退出循环
 
@@ -114,23 +109,22 @@ void handl_upload(int socketfd) {
             total_sent += bytes_sent;
 
             // 更新进度条
-            print_progress((double)total_sent / file_size);
-
+            update_progress_bar(total_sent, file_size, &last_time);
             // 每隔一定数据量保存一次偏移量
             if (total_sent - last_saved_offset >= SAVE_OFFSET_THRESHOLD) {
-                save_offset(offset_file, total_sent);
+                save_offset(offset_path, total_sent);
                 last_saved_offset = total_sent;
             }
         }
 
         // 确保退出前保存最后一次偏移量
         if (total_sent > last_saved_offset) {
-            save_offset(offset_file, total_sent);
+            save_offset(offset_path, total_sent);
         }
 
         // 删除偏移量文件（如果上传完成）
         if (total_sent >= file_size) {
-            remove(offset_file);
+            remove(offset_path);
         }
 
         printf("\nFile uploaded successfully.\n");
@@ -144,20 +138,23 @@ void handl_upload(int socketfd) {
 }
 
 
-void handl_download(int socketfd) {
+void handl_download(int socketfd, char* filename) {
         //下载文件
         printf("即将下载...\n");
 
         // 打开输出文件
-        const char *output_file = "../fileshouse_client/1000mb_file";
-        int output_fd = open(output_file, O_RDWR | O_CREAT, 0644);
+        char output_path[256];
+        snprintf(output_path, sizeof(output_path), "../fileshouse_client/%s", filename);
+
+        int output_fd = open(output_path, O_RDWR | O_CREAT, 0644);
         if (output_fd < 0) {
             perror("File open failed");
         }
 
-        const char *offset_file = "../fileshouse_client/download_offset.dat";
+        char offset_path[256];
+        snprintf(offset_path, sizeof(offset_path), "../fileshouse_client/%s_download_offset.dat", filename);
         // 读取断点偏移量
-        off_t offset = read_offset(offset_file);
+        off_t offset = read_offset(offset_path);
         printf("Resuming download from offset: %ld\n", offset);
 
         // 发送起始偏移量给服务端
@@ -190,6 +187,7 @@ void handl_download(int socketfd) {
         // 接收文件内容
         char buffer[4096] = {0};
         long total_received = offset;
+        clock_t last_time = clock();
         while (total_received < file_size) {
             if (should_exit) break; // 如果捕获到退出信号，退出循环
 
@@ -204,23 +202,23 @@ void handl_download(int socketfd) {
             total_received += bytes_received;
 
             // 更新进度条
-            print_progress((double)total_received / file_size);
+            update_progress_bar(total_received, file_size, &last_time);
 
             // 每隔一定数据量保存一次偏移量
             if (total_received - last_saved_offset >= SAVE_OFFSET_THRESHOLD) {
-                save_offset(offset_file, total_received);
+                save_offset(offset_path, total_received);
                 last_saved_offset = total_received;
             }
         }
 
         // 确保退出前保存最后一次偏移量
         if (total_received > last_saved_offset) {
-            save_offset(offset_file, total_received);
+            save_offset(offset_path, total_received);
         }
 
         // 删除偏移量文件（如果下载完成）
         if (total_received >= file_size) {
-            remove(offset_file);
+            remove(offset_path);
         }
 
 
@@ -249,10 +247,14 @@ void handl_download(int socketfd) {
 //文件传输线程要执行的函数
 void* thp_tsf_function(void* arg){
     tast_queue* q = (tast_queue*)arg;
-
     //从队列中取出任务
     void* t1 = tast_queue_pop(q);//线程一般会在这阻塞和唤醒
     cmd_tast* t = (cmd_tast*)t1;
+    //取出文件名
+    char* content = t->content;//download 1000mb_file
+    char* filename = strtok(content," ");
+    filename = strtok(NULL," ");
+    printf("filename:%s\n",filename);
     
     //创建新socket，并connect到服务器
     int socketfd = tcp_connect("127.0.0.1", 12222);
@@ -260,13 +262,41 @@ void* thp_tsf_function(void* arg){
     //----------------------已和服务端子线程函数建立了TCP连接------------------------------
 
     if(t->cmdType == CMD_TYPE_UPLOAD){
-        handl_upload(socketfd);
+        handl_upload(socketfd, filename);
     }
     if(t->cmdType == CMD_TYPE_DOWNLOAD){
-        handl_download(socketfd);
+        handl_download(socketfd, filename);
 
     }
 
     return 0;
 }
 
+
+  
+// 文件末尾添加函数实现
+void update_progress_bar(long current, long total, clock_t* last_time) {
+    double progress = (double)current / total;
+    int bar_width = 50;
+    
+    // 计算传输速度
+    clock_t now = clock();
+    double elapsed = (double)(now - *last_time) / CLOCKS_PER_SEC;
+    double speed = (elapsed > 0) ? ((current - (progress * total)) / 1048576.0 / elapsed) : 0;
+    
+    printf("\033[33m[");
+    int pos = bar_width * progress;
+    for (int i = 0; i < bar_width; ++i) {
+        if (i < pos) printf("\033[32m=");
+        else if (i == pos) printf("\033[34m>");
+        else printf(" ");
+    }
+    printf("\033[33m] \033[0m");
+    
+    printf("\033[36m%.2f%%\033[0m | ", progress * 100);
+    printf("Size: \033[35m%.2fMB\033[0m | ", current / 1048576.0);
+    printf("Speed: \033[31m%.2fMB/s\033[0m\r", speed);
+    fflush(stdout);
+    
+    *last_time = now;
+}
