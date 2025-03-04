@@ -3,6 +3,7 @@
 #include "../config/config.h"
 #include "epoll_plug.h"
 #include "cmd_tast.h"
+#include <syslog.h>
 
 int server_user_recv(int listenfd, int epfd, MYSQL* p_mysql,struct user_table * userTable){
     //对新用户进行accept
