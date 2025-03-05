@@ -1,5 +1,9 @@
 #include "login.h"
 #include <stdarg.h>
+
+// 使用extern声明current_path
+extern char current_path[512]; 
+
 // 自定义的error函数
 void error(int status, int err, const char *fmt,...) {
     va_list args;
@@ -23,7 +27,7 @@ void error(int status, int err, const char *fmt,...) {
 }
 //login1流程
 //输入用户名-----将输入内容发给服务端-----服务端返回结果-----根据结果判断是否继续输入---也就是判断用户名是否正确
-void login_01(cmd_tast* t,int* connect_fd){
+void login_01(cmd_tast* t,int* connect_fd,char *username){
     while(1){
         memset(t->content,0,MAX_CMD_SIZE);
         t->cmdType=CMD_TYPE_LOGIN1;
@@ -40,6 +44,11 @@ void login_01(cmd_tast* t,int* connect_fd){
         }
         //存到结构体中
         strcpy(t->content,buffer);
+
+        strcpy(username,buffer);
+        //这时候t->content里就是用户名
+        //printf("t->content in client_login01:%s\n",t->content);
+
         send(*connect_fd,t,sizeof(cmd_tast),0);
 
         int err=recv(*connect_fd,(char*)t,sizeof(cmd_tast),0);
@@ -68,7 +77,7 @@ void login_01(cmd_tast* t,int* connect_fd){
 }
 //login2流程
 //基于第一步获取盐值----对用户输入的密码进行加密-----发送给服务器----根据服务器响应是否成功
-void login_02(cmd_tast* t,int* connect_fd){
+void login_02(cmd_tast* t,int* connect_fd,char *username){
      //存盐值
      char buffersalt[4096]={0};
      strncpy(buffersalt,t->content,strlen(t->content));
@@ -111,7 +120,10 @@ void login_02(cmd_tast* t,int* connect_fd){
              printf(ANSI_COLOR_CYAN);
              printf("netdisk:");
              printf(ANSI_COLOR_RESET);
-             printf("成功登录,当前路径为%s\n\n",t->path);
+             printf("成功登录\n");
+             // 更新 current_path
+            snprintf(current_path, sizeof(current_path), "/%s", username);
+            printf("%s@ /%s $",username, username);  // 使用保存的用户名
              break;
          }
          if(t->cmdType==CMD_TYPE_LOGIN2_ERROR){
