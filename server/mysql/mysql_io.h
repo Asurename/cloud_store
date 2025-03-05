@@ -34,5 +34,5 @@ int mysql_get_user_id(MYSQL* p_mysql, char* buf, const char* username);
 int mysql_get_user_data(MYSQL* p_mysql, char* buf, const char* username, const char* field);
 int mysql_get_user_path(MYSQL* p_mysql, char* buf, const char* cryptpasswd, const char* field);
 int mysql_get_user_info(MYSQL* p_mysql, char* buf, const char* condition_field, const char* condition_value, const char* target_field);
-
+int mysql_get_file_data(MYSQL* p_mysql, char* buf, const char* key_name, const char* key_value, const char* field);
 #endif
