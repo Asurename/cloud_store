@@ -155,6 +155,10 @@ int server_regite2(cmd_tast* t,MYSQL* p_mysql){
         return -1;
     }
     printf("buf:%s\n",buf);
+
+    char file_path_data[4096]={0};
+    snprintf(file_path_data, sizeof(file_path_data), "/%s", t->content);
+
     // 初始化虚拟文件表
     file_data initialize_file = {
        .parent_id = "0",
@@ -163,9 +167,11 @@ int server_regite2(cmd_tast* t,MYSQL* p_mysql){
        .hash = "",
        .filesize = "0",
        .type = "1",
-       .file_path = t->content
+       .file_path = file_path_data
     };
-    
+    // 添加斜杠和用户名到 file_path
+    //snprintf(initialize_file.file_path, sizeof(initialize_file.file_path), "/%s", t->content);
+
     //strcpy(initialize_file.owner_id, buf);  // 复制用户 ID
     printf("initialize_file.owner_id:%s\n",initialize_file.owner_id);
     err = mysql_write_file_data(p_mysql, initialize_file);
@@ -173,14 +179,5 @@ int server_regite2(cmd_tast* t,MYSQL* p_mysql){
         error(0, errno, "mysql_write_file_data failed");
         return -1;
     }
-    // 创建与用户同名的根目录
-    char dir_path[256];
-    snprintf(dir_path, sizeof(dir_path), "./%s", t->content);  // 假设根目录在当前目录下
-    if (mkdir(dir_path, 0755) == -1) {  // 创建目录，权限为 0755
-        error(0, errno, "创建用户根目录失败");
-        return -1;
-    }
-    printf("用户'%s'的根目录创建成功\n", t->content);
-
     return 0;
 }
