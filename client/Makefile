@@ -1,7 +1,7 @@
 CC := gcc
 CFLAGS := -Wall -Wextra -g
 LDFLAGS := 
-LDLIBS := -lpthread -lmysqlclient -lcjson -lcrypt  # 根据实际需要的库添加
+LDLIBS := -lpthread -lmysqlclient -lcjson -lcrypt   -lssl -lcrypto# 根据实际需要的库添加
 
 # 自动获取所有子目录作为头文件包含路径
 DIRS := $(shell find . -type d)
