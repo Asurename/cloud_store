@@ -19,7 +19,8 @@ int server_user_recv(int listenfd, int epfd, MYSQL* p_mysql,struct user_table * 
     int current_index = timeoutArrayIndex;
     //printf("timeoutArrayIndex : %d \n",timeoutArrayIndex);
     pthread_mutex_unlock(&timeout_index_mutex);
-    timeout_array_add(netfdArray, userTable, current_index, fd);
+    int setIdx = -1;
+    timeout_array_add(netfdArray, userTable, current_index, fd,&setIdx);
 
     //对新用户进行监听
     epoll_mod(epfd,EPOLL_CTL_ADD,EPOLLIN,fd);
