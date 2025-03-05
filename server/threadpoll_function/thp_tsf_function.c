@@ -1,10 +1,21 @@
 //服务端
 #include "../lib.h"
 #include <sys/sendfile.h>
+#include <openssl/sha.h>
 
 void update_progress_bar(long current, long total, clock_t* last_time);
 
 void handl_upload(int socketfd, char* filename){
+
+    // 接收客户端发送的哈希值
+    char client_hash[65] = {0};
+    if (recv(socketfd, client_hash, sizeof(client_hash), 0) <= 0) {
+        perror("接收哈希值失败");
+        close(socketfd);
+    }
+    printf("客户端发送的哈希值: %s\n", client_hash);
+
+
     //接受上传文件
     printf("正在接受来自客户端xxx的文件...\n");//可加客户ip
 
@@ -20,22 +31,6 @@ void handl_upload(int socketfd, char* filename){
     char output_path[512];
     snprintf(output_path, sizeof(output_path), "../fileshouse_server/%s", filename);
 
-    // 文件名冲突检测(可去掉，只要能接受就可以)
-    int counter = 1;
-    while (access(output_path, F_OK) != -1) {
-        char ext[32] = {0};
-        char name[224] = {0};
-        // 分离文件名和扩展名
-        char *dot = strrchr(filename, '.');
-        if (dot) {
-            strncpy(ext, dot, sizeof(ext)-1);  // 保留扩展名
-            strncpy(name, filename, dot - filename);  // 主文件名
-        } else {
-            strncpy(name, filename, sizeof(name)-1);
-        }
-        // 生成新文件名
-        snprintf(output_path, sizeof(output_path), "../fileshouse_server/%s_%d%s", name, counter++, ext);
-    }
 
     int output_fd = open(output_path, O_RDWR | O_CREAT, 0644);
     if (output_fd < 0) {
@@ -73,6 +68,40 @@ void handl_upload(int socketfd, char* filename){
         fflush(stdout);
     }
     printf("\nFile received and saved as '%s'\n", output_path);
+
+    
+
+     // 接收完文件后验证哈希
+    printf("\n开始验证文件完整性...\n");
+
+    // 重新打开文件计算哈希
+    int verify_fd = open(output_path, O_RDONLY);
+    unsigned char server_hash[SHA256_DIGEST_LENGTH];
+    SHA256_CTX sha256;
+    SHA256_Init(&sha256);
+
+    char buffer2[4096];
+    ssize_t bytes_read;
+    while ((bytes_read = read(verify_fd, buffer2, sizeof(buffer))) > 0) {
+        SHA256_Update(&sha256, buffer2, bytes_read);
+    }
+    SHA256_Final(server_hash, &sha256);
+    close(verify_fd);
+
+    // 转换服务端哈希为字符串
+    char server_hash_str[65] = {0};
+    for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+        sprintf(&server_hash_str[i*2], "%02x", server_hash[i]);
+
+    // 比较哈希值
+    if (strcmp(client_hash, server_hash_str) == 0) {
+        printf("文件校验成功，哈希值匹配！\n");
+    } else {
+        printf("警告：文件校验失败！\n");
+        printf("客户端哈希：%s\n", client_hash);
+        printf("服务端哈希：%s\n", server_hash_str);
+    }
+
 
     // 关闭文件和连接
     close(output_fd);
@@ -166,13 +195,8 @@ void* thp_tsf_function(void * arg){
 
 void update_progress_bar(long current, long total, clock_t* last_time) {
     double progress = (double)current / total;
-    int bar_width = 50;
-    
-    // 计算传输速度
-    clock_t now = clock();
-    double elapsed = (double)(now - *last_time) / CLOCKS_PER_SEC;
-    double speed = (elapsed > 0) ? ((current - (progress * total)) / 1048576.0 / elapsed) : 0;
-    
+    int bar_width = 30;  // 缩短进度条长度
+
     printf("\033[33m[");
     int pos = bar_width * progress;
     for (int i = 0; i < bar_width; ++i) {
@@ -181,11 +205,11 @@ void update_progress_bar(long current, long total, clock_t* last_time) {
         else printf(" ");
     }
     printf("\033[33m] \033[0m");
-    
+
+    // 移除速度显示，只保留百分比和大小
     printf("\033[36m%.2f%%\033[0m | ", progress * 100);
-    printf("Size: \033[35m%.2fMB\033[0m | ", current / 1048576.0);
-    printf("Speed: \033[31m%.2fMB/s\033[0m\r", speed);
+    printf("Size: \033[35m%.2fMB\033[0m\r", current / 1048576.0);
     fflush(stdout);
-    
-    *last_time = now;
+
+    *last_time = clock();  // 简化时间更新逻辑
 }

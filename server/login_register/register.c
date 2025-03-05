@@ -162,7 +162,7 @@ int server_regite2(cmd_tast* t,MYSQL* p_mysql){
        .owner_id = buf,
        .hash = "",
        .filesize = "0",
-       .type = "0",
+       .type = "1",
        .file_path = t->content
     };
     

@@ -1,6 +1,7 @@
 //客户端
 #include "thp_tsf_function.h"
 #include <mysql/mysql.h>
+#include <openssl/sha.h>//链接加-lssl -lcrypto
 
 #define SAVE_OFFSET_THRESHOLD (10 * 1024 * 1024) // 每 1MB 保存一次偏移量
 
@@ -52,6 +53,40 @@ void handl_upload(int socketfd, char* filename) {
             close(socketfd);
         }
 
+
+    // 计算文件哈希值
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_CTX sha256;
+    SHA256_Init(&sha256);
+    
+    // 临时保存当前文件偏移
+    off_t current_offset = lseek(input_fd, 0, SEEK_CUR);
+    lseek(input_fd, 0, SEEK_SET);  // 回到文件开头计算完整哈希
+    
+    char buffer[4096];
+    ssize_t bytes_read;
+    while ((bytes_read = read(input_fd, buffer, sizeof(buffer))) > 0) {
+        SHA256_Update(&sha256, buffer, bytes_read);
+    }
+    SHA256_Final(hash, &sha256);
+    lseek(input_fd, current_offset, SEEK_SET);  // 恢复原来的偏移
+    
+    // 转换哈希值为字符串
+    char hash_str[SHA256_DIGEST_LENGTH*2+1];
+    for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+        sprintf(&hash_str[i*2], "%02x", hash[i]);
+    
+    // 发送哈希值给服务端
+    if (send(socketfd, hash_str, sizeof(hash_str), 0) <= 0) {
+        perror("发送哈希值失败");
+        close(input_fd);
+        close(socketfd);
+        return;
+    }
+
+
+
+
         // 获取文件大小
         struct stat file_stat;
         if (fstat(input_fd, &file_stat) < 0) {
@@ -88,7 +123,7 @@ void handl_upload(int socketfd, char* filename) {
 
         // 上传文件内容
         long total_sent = offset;
-        char buffer[4096];
+        memset(buffer, 0, sizeof(buffer));
         clock_t last_time = clock();  // 初始化计时器
         while (total_sent < file_size) {
             if (should_exit) break; // 如果捕获到退出信号，退出循环
@@ -272,17 +307,9 @@ void* thp_tsf_function(void* arg){
     return 0;
 }
 
-
-  
-// 文件末尾添加函数实现
 void update_progress_bar(long current, long total, clock_t* last_time) {
     double progress = (double)current / total;
-    int bar_width = 50;
-    
-    // 计算传输速度
-    clock_t now = clock();
-    double elapsed = (double)(now - *last_time) / CLOCKS_PER_SEC;
-    double speed = (elapsed > 0) ? ((current - (progress * total)) / 1048576.0 / elapsed) : 0;
+    int bar_width = 30;  // 缩短进度条长度
     
     printf("\033[33m[");
     int pos = bar_width * progress;
@@ -293,10 +320,10 @@ void update_progress_bar(long current, long total, clock_t* last_time) {
     }
     printf("\033[33m] \033[0m");
     
+    // 移除速度显示，只保留百分比和大小
     printf("\033[36m%.2f%%\033[0m | ", progress * 100);
-    printf("Size: \033[35m%.2fMB\033[0m | ", current / 1048576.0);
-    printf("Speed: \033[31m%.2fMB/s\033[0m\r", speed);
+    printf("Size: \033[35m%.2fMB\033[0m\r", current / 1048576.0);
     fflush(stdout);
     
-    *last_time = now;
+    *last_time = clock();  // 简化时间更新逻辑
 }
