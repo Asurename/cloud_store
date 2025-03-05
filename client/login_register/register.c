@@ -1,5 +1,6 @@
 #include "register.h"
-
+// 使用extern声明current_path
+extern char current_path[512]; 
 //输入相关
 int input_client_info(const char * logintips,char *buffer,int length){
     // 检查参数有效性
@@ -116,6 +117,10 @@ int client_regite2(int connect_fd, cmd_tast* t){
         strcpy(t->path, t->content);
         printf("t->content: %s\n", t->content); // 修正打印语句
     }
+
+    // 更新 current_path
+    snprintf(current_path, sizeof(current_path), "/%s", t->content);
+    
 
     return 0;
 }
