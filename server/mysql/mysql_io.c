@@ -161,7 +161,10 @@ int mysql_get_user_path(MYSQL* p_mysql, char* buf, const char* cryptpasswd, cons
 
 
 //通用的查询函数
-int mysql_get_user_info(MYSQL* p_mysql, char* buf, const char* condition_field, const char* condition_value, const char* target_field) {
+int mysql_get_user_info(MYSQL* p_mysql, char* buf,
+                        const char* condition_field,
+                        const char* condition_value,
+                        const char* target_field) {
     char query[256];
     sprintf(query, "select %s from user_data where %s = '%s'", target_field, condition_field, condition_value);
     int ret = mysql_query(p_mysql, query);
@@ -179,6 +182,35 @@ int mysql_get_user_info(MYSQL* p_mysql, char* buf, const char* condition_field, 
     if (strcmp(condition_field, "cryptpasswd") == 0) {
         printf("Query user path: %s\n\n", row[0]);
     }
+    strcpy(buf, row[0]);
+    mysql_free_result(res);
+    return 0;
+}
+
+int mysql_get_file_data(MYSQL* p_mysql, char* buf,
+                        const char* key_name,
+                        const char* key_value,
+                        const char* field) {
+    char query[256];
+    if(strcmp(key_name,"filename")== 0 || strcmp(key_name,"file_path") == 0||strcmp(key_name,"hash") == 0){
+        sprintf(query, "select %s from virtual_file_table where %s = '%s'",
+                field,
+                key_name,
+                key_value);
+    }else{
+        sprintf(query, "select %s from virtual_file_table where %s = %s",
+                field,
+                key_name,
+                key_value);
+    }
+    int ret = mysql_query(p_mysql, query);
+    if (ret != 0) {
+        error(0, 0, "mysql_query");
+        return -1;
+    }
+    MYSQL_ROW row;
+    MYSQL_RES* res = mysql_use_result(p_mysql);
+    row = mysql_fetch_row(res);
     strcpy(buf, row[0]);
     mysql_free_result(res);
     return 0;

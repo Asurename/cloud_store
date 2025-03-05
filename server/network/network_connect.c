@@ -8,8 +8,13 @@ int tcp_connection_bliud(const char *ip,int port){
 
     int fd = socket(AF_INET,SOCK_STREAM,0);
     if(fd == -1) error(1,errno,"socket");
+
     
     int ret;
+    int reuse = 1;
+    ret = setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&reuse,sizeof(reuse));
+    if(ret == -1) error(1,errno,"setsockopt");
+
     ret = bind(fd,(struct sockaddr*)&addr,sizeof(struct sockaddr));
     if(ret == -1) error(1,errno,"bind");
 
