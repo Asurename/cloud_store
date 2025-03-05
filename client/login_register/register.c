@@ -10,7 +10,9 @@ int input_client_info(const char * logintips,char *buffer,int length){
     }
 
     //打印提示信息
+    printf(ANSI_COLOR_CYAN);
     printf("%s",logintips);
+    printf(ANSI_COLOR_RESET);
     fflush(stdout);
     //读取用户输入
     if(fgets(buffer,length,stdin)==NULL){
