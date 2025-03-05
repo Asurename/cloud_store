@@ -25,6 +25,13 @@ void error(int status, int err, const char *fmt,...) {
         exit(status);
     }
 }
+
+// 清空输入缓冲区
+void clear_input_buffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
+
 //login1流程
 //输入用户名-----将输入内容发给服务端-----服务端返回结果-----根据结果判断是否继续输入---也就是判断用户名是否正确
 void login_01(cmd_tast* t,int* connect_fd,char *username){
@@ -33,12 +40,15 @@ void login_01(cmd_tast* t,int* connect_fd,char *username){
         t->cmdType=CMD_TYPE_LOGIN1;
         char buffer[MAX_CMD_SIZE];
 
-        printf(ANSI_COLOR_CYAN);
-        printf("请输入用户名:");
-        printf(ANSI_COLOR_RESET);
+        //printf(ANSI_COLOR_CYAN);
+        //printf("请输入用户名:");
+        //printf(ANSI_COLOR_RESET);
+
+        // 清空输入缓冲区
+        //clear_input_buffer();
 
         //处理错误
-        if(input_client_info(" ",buffer,MAX_CMD_SIZE)==-1){
+        if(input_client_info("请输入用户名:",buffer,MAX_CMD_SIZE)==-1){
             error(0,errno,"input_client_info failed in login_01 ");
             continue; 
         }
@@ -118,12 +128,12 @@ void login_02(cmd_tast* t,int* connect_fd,char *username){
              printf(ANSI_COLOR_RESET);
              printf("密码正确,密文为%s\n",t->content);
              printf(ANSI_COLOR_CYAN);
-             printf("netdisk:");
+             printf("netdisk>>>>>>>>>>>>>>>>>>");
              printf(ANSI_COLOR_RESET);
              printf("成功登录\n");
              // 更新 current_path
             snprintf(current_path, sizeof(current_path), "/%s", username);
-            printf("%s@ /%s $",username, username);  // 使用保存的用户名
+            //printf("%s@1111 /%s $",username, username);  // 使用保存的用户名
              break;
          }
          if(t->cmdType==CMD_TYPE_LOGIN2_ERROR){
