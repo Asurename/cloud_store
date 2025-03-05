@@ -16,7 +16,7 @@ int clinet_msg_recv(int fd, char *current_path)
 
     if (ret == 0)
     {
-        error(1, errno, "被踢出");
+        error(1, errno,"%serror:数据接收长度为0%s",ANSI_COLOR_RED,ANSI_COLOR_RESET);
         return -1;
     }
 
