@@ -66,6 +66,8 @@ int main()
     int t_len = sizeof(cmd_tast);
     char buf[MAX_CMD_SIZE];
 
+    char username[MAX_CMD_SIZE];
+
     // 建立epoll监听
     int epfd = epoll_create1(0);
     epoll_mod(epfd, EPOLL_CTL_ADD, EPOLLIN, cmd_fd);
@@ -82,8 +84,8 @@ int main()
         char c = get_valid_input();
 
         if (c == '1') {
-            login_01(&t_send, &cmd_fd);
-            login_02(&t_send, &cmd_fd);
+            login_01(&t_send, &cmd_fd,username);
+            login_02(&t_send, &cmd_fd,username);
             strcpy(path, t_send.path);
             choice_made = 1; // 标记已经做出选择
         } else if (c == '2') {
@@ -99,12 +101,12 @@ int main()
     printf(ANSI_COLOR_RESET);
 
     printf(ANSI_COLOR_CYAN);
-    printf("Cloud_disk:james  \n");
+    printf("Cloud_disk:%s  \n",current_path);
     fflush(stdout);
     printf(ANSI_COLOR_RESET);
 
     printf(ANSI_COLOR_CYAN);
-    printf("james@ %s $  ", current_path);
+    printf("%s@ %s $  ",current_path, current_path);
     fflush(stdout);
     printf(ANSI_COLOR_RESET);
 
@@ -120,7 +122,7 @@ int main()
                 // 进入消息接收
                 clinet_msg_recv(cmd_fd, current_path);
                 printf(ANSI_COLOR_CYAN);
-                printf("james@ %s $  ", current_path);
+                printf("%s@ %s $  ",current_path, current_path);
                 fflush(stdout);
                 printf(ANSI_COLOR_RESET);
             }
