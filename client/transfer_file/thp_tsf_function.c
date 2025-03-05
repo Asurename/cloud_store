@@ -1,5 +1,6 @@
 //客户端
 #include "thp_tsf_function.h"
+#include <stdio.h>
 #include <mysql/mysql.h>
 #include <openssl/sha.h>//链接加-lssl -lcrypto
 
@@ -102,6 +103,55 @@ void handl_upload(int socketfd, char* filename) {
             close(input_fd);
             close(socketfd);
         }
+
+
+    //-----------------------------数据库处理逻辑------------------------
+        char res[2] = {0};
+        if (recv(socketfd, res, sizeof(res), 0) <= 0) {
+            perror("recv response failed");
+            close(input_fd);
+            close(socketfd);
+            return;
+        }
+        if(res[0] == '1'){
+            printf("文件已存在，无需上传！\n");
+            close(input_fd);
+            close(socketfd); 
+            return;
+        }
+        if(res[0] == '2'){
+            printf("文件名重复，但是内容不一样，是否覆盖？\n");
+            char choice;
+            scanf(" %c", &choice);
+            while(getchar() != '\n');
+            if(choice == 'y'){
+                // 完善send参数并添加错误检查
+                if (send(socketfd, &choice, 1, 0) <= 0) {
+                    perror("发送选择失败");
+                    close(input_fd);
+                    close(socketfd);
+                    return;
+                }
+            }else{
+                printf("文件上传已取消！\n");
+                close(input_fd);
+                close(socketfd);
+                return;
+            }
+        }
+        if(res[0] == '3'){
+            printf("秒传成功！\n");
+            close(input_fd);
+            close(socketfd);
+            return;
+        }
+        if(res[0] == '4'){
+        }
+
+
+    //----------------------------以下文件传输逻辑-------------------------
+
+
 
         // 接收服务端请求的起始偏移量
         off_t offset;
