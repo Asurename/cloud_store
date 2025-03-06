@@ -42,6 +42,12 @@ int server_msg_recv(int fd, int epfd, threadpool* thp_cmd,threadpool* thp_tsf,st
         printf(ANSI_COLOR_RESET);
         int setIdx = -1;
         int current_index = user_table_find(fd,userTable,&setIdx);
+        if(setIdx < 0)
+        {
+            syslog(LOG_ERR,"setIdx = -1\n");
+            printf("setIdx = -1\n");
+            return -1;
+        }
         netfdArray[current_index][setIdx] = -1;
         user_table_erase(fd,userTable);
         close(fd);
