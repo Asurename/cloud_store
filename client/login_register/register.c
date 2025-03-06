@@ -53,7 +53,7 @@ int client_regite1(int connect_fd,cmd_tast* t){
         }
 
         // 接收服务器读取状态
-        err = recv(connect_fd, (char*)t, sizeof(*t), 0);
+        err = recv(connect_fd, (char*)t, sizeof(*t), MSG_WAITALL);
         if (err == -1) {
             error(0, errno, "login_regite1 recv");
             continue; // 接收失败，重新输入
@@ -78,7 +78,7 @@ int client_regite2(int connect_fd, cmd_tast* t){
     }
 
     // 接收服务器发过来的盐值
-    int err = recv(connect_fd, (char*)t, sizeof(*t), 0);
+    int err = recv(connect_fd, (char*)t, sizeof(*t), MSG_WAITALL);
     if (err == -1) {
         error(0, errno, "recv the salt error");
         return -1; // 接收盐值失败
@@ -108,7 +108,7 @@ int client_regite2(int connect_fd, cmd_tast* t){
     }
 
     // 接收注册结果
-    err = recv(connect_fd, (char*)t, sizeof(*t), 0);
+    err = recv(connect_fd, (char*)t, sizeof(*t), MSG_WAITALL);
     if (err == -1) {
         error(0, errno, "login_regite2 recv error");
         return -1; // 接收注册结果失败

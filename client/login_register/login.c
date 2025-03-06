@@ -61,11 +61,13 @@ void login_01(cmd_tast* t,int* connect_fd,char *username){
 
         send(*connect_fd,t,sizeof(cmd_tast),0);
 
-        int err=recv(*connect_fd,(char*)t,sizeof(cmd_tast),0);
+        int err=recv(*connect_fd,(char*)t,sizeof(cmd_tast),MSG_WAITALL);
         if(err==-1){
             error(0,errno,"recv failed in login_01");
             continue;
         }
+
+        printf("input username = %s\n",buffer);
         
         //成功登录
         if(t->cmdType==CMD_TYPE_LOGIN1_OK){
@@ -116,7 +118,7 @@ void login_02(cmd_tast* t,int* connect_fd,char *username){
          //发送
          send(*connect_fd,t,sizeof(cmd_tast),0);
          //接收
-         int err=recv(*connect_fd,(char*)t,sizeof(cmd_tast),0);
+         int err=recv(*connect_fd,(char*)t,sizeof(cmd_tast),MSG_WAITALL);
          if(err==-1){
              error(0,errno,"recv failed in login_02");
              continue;
@@ -132,6 +134,7 @@ void login_02(cmd_tast* t,int* connect_fd,char *username){
              printf(ANSI_COLOR_RESET);
              printf("成功登录\n");
              // 更新 current_path
+            printf("current_path = %s\n",current_path);
             snprintf(current_path, sizeof(current_path), "/%s", username);
             //printf("%s@1111 /%s $",username, username);  // 使用保存的用户名
              break;

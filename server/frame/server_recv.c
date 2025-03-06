@@ -30,7 +30,7 @@ int server_user_recv(int listenfd, int epfd, MYSQL* p_mysql,struct user_table * 
 int server_msg_recv(int fd, int epfd, threadpool* thp_cmd,threadpool* thp_tsf,struct user_table * userTable, int tsf_fd){
     //创建接收结构体
     cmd_tast* recv_t = (cmd_tast*)malloc(sizeof(cmd_tast));
-    int ret = recv(fd,(char*)recv_t,sizeof(cmd_tast),0);    
+    int ret = recv(fd,(char*)recv_t,sizeof(cmd_tast),MSG_WAITALL);    
                  //异常情况处理
     if(ret == -1){
          error(0,errno,"server_msg_recv recv");
