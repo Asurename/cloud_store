@@ -67,7 +67,7 @@ void login_01(cmd_tast* t,int* connect_fd,char *username){
             continue;
         }
 
-        printf("input username = %s\n",buffer);
+        //printf("input username = %s\n",buffer);
         
         //成功登录
         if(t->cmdType==CMD_TYPE_LOGIN1_OK){
@@ -105,9 +105,9 @@ void login_02(cmd_tast* t,int* connect_fd,char *username){
          printf(ANSI_COLOR_RESET);
          //加密
          char* crypted_password=crypt(bufferpassword,buffersalt);
-         printf("pw = %s\n",bufferpassword);
-         printf("buffersalt = %s\n",buffersalt);
-         printf("crypted_password = %s\n",crypted_password);
+         //printf("pw = %s\n",bufferpassword);
+         //printf("buffersalt = %s\n",buffersalt);
+         //printf("crypted_password = %s\n",crypted_password);
          if(crypted_password==NULL){
              error(0,errno,"crypt failed in login_02");
              continue; 
@@ -128,13 +128,13 @@ void login_02(cmd_tast* t,int* connect_fd,char *username){
              printf(ANSI_COLOR_RED);
              printf("netdisk:");
              printf(ANSI_COLOR_RESET);
-             printf("密码正确,密文为%s\n",t->content);
+             printf("密码正确,你的密文为%s\n",t->content);
              printf(ANSI_COLOR_CYAN);
              printf("netdisk>>>>>>>>>>>>>>>>>>");
              printf(ANSI_COLOR_RESET);
              printf("成功登录\n");
              // 更新 current_path
-            printf("current_path = %s\n",current_path);
+            //printf("current_path is = %s\n",current_path);
             snprintf(current_path, sizeof(current_path), "/%s", username);
             //printf("%s@1111 /%s $",username, username);  // 使用保存的用户名
              break;
