@@ -106,7 +106,7 @@ int main()
     printf(ANSI_COLOR_RESET);
 
     printf(ANSI_COLOR_CYAN);
-    printf("%s@ %s $  ",current_path, current_path);
+    printf("%s@ %s $  ",username, current_path);
     fflush(stdout);
     printf(ANSI_COLOR_RESET);
 
