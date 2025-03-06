@@ -78,6 +78,16 @@ int main()
     int recv_num;
     int choice_made = 0;  // 标记是否已经做出选择
     system("clear");
+
+    printf(ANSI_COLOR_HIGHLIGHT);
+    printf(ANSI_COLOR_YELLOW);
+    printf("------------------------------------------\n");
+    printf("\t欢迎使用new组云服务器\n");
+    printf("\t请先完成登入或注册\n");
+    printf("------------------------------------------\n");
+    printf(ANSI_COLOR_RESET);
+    sleep(1);
+
     while (!choice_made) {
         print_prompt("Input << 1 >>  Login");
         print_prompt("Input << 2 >>  Registration");
@@ -96,14 +106,18 @@ int main()
             choice_made = 1; // 标记已经做出选择
         }
     }
+    sleep(1);
 
     printf(ANSI_COLOR_YELLOW);
+    printf(ANSI_COLOR_HIGHLIGHT);
+    printf("\n------------------------------------------\n");
     printf(ANSI_COLOR_START);
-    printf("[System]wellcome!\n\n");
-
-    sleep(1);
+    printf("\t[System]wellcome %s!(ゝ∀･)\n",username);
+    printf(ANSI_COLOR_NOSTART);
+    printf("------------------------------------------\n\n");
     printf(ANSI_COLOR_RESET);
 
+    printf(ANSI_COLOR_HIGHLIGHT);
     printf("%s[%s(=´ω`=)]%s %s >> %s",ANSI_COLOR_CYAN,username,
                        ANSI_COLOR_YELLOW, current_path,ANSI_COLOR_RESET);
     fflush(stdout);
@@ -120,6 +134,7 @@ int main()
             {
                 // 进入消息接收
                 clinet_msg_recv(cmd_fd, current_path);
+                printf(ANSI_COLOR_HIGHLIGHT);
                 printf("%s[%s(=´ω`=)]%s %s >> %s",ANSI_COLOR_CYAN,username,
                        ANSI_COLOR_YELLOW, current_path,ANSI_COLOR_RESET);
                 fflush(stdout);
