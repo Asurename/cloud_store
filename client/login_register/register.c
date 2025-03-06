@@ -1,9 +1,36 @@
 #include "register.h"
+#include <termios.h>
 // 使用extern声明current_path
 extern char current_path[512]; 
+extern char username[MAX_CMD_SIZE]; 
 //输入相关
-int input_client_info(const char * logintips,char *buffer,int length){
+int disable_echo() {
+    struct termios tty;
+    if (tcgetattr(STDIN_FILENO, &tty) != 0) {
+        return -1;
+    }
+    tty.c_lflag &= ~ECHO;
+    if (tcsetattr(STDIN_FILENO, TCSANOW, &tty) != 0) {
+        return -1;
+    }
+    return 0;
+}
+
+int enable_echo() {
+    struct termios tty;
+    if (tcgetattr(STDIN_FILENO, &tty) != 0) {
+        return -1;
+    }
+    tty.c_lflag |= ECHO;
+    if (tcsetattr(STDIN_FILENO, TCSANOW, &tty) != 0) {
+        return -1;
+    }
+    return 0;
+}
+
+int input_client_info(const char * logintips,char *buffer,int length,int type){
     // 检查参数有效性
+    if(type == 0)disable_echo();
     if (logintips == NULL || buffer == NULL || length <= 0) {
         error(0, 0, "input_client_info: invalid parameters");
         return -1;
@@ -24,6 +51,7 @@ int input_client_info(const char * logintips,char *buffer,int length){
     if(input_length>0&&buffer[input_length-1]=='\n'){
         buffer[input_length-1]='\0';
     }
+    if(type == 0)enable_echo();
     return 0;
 }
 
@@ -37,7 +65,7 @@ int client_regite1(int connect_fd,cmd_tast* t){
 
         // 输入用户名
         t->cmdType = CMD_TYPE_REGIT1;
-        if (input_client_info("请输入用户名: ", username, sizeof(username)) != 0) {
+        if (input_client_info("请输入用户名: ", username, sizeof(username),1) != 0) {
             continue; // 输入失败，重新输入
         }
 
@@ -73,7 +101,7 @@ int client_regite2(int connect_fd, cmd_tast* t){
     char password[MAX_PASSWORD_LEN];
 
     // 输入密码
-    if (input_client_info("请输入密码: ", password, sizeof(password)) != 0) {
+    if (input_client_info("请输入密码: ", password, sizeof(password),0) != 0) {
         return -1; // 输入失败
     }
 
@@ -117,11 +145,11 @@ int client_regite2(int connect_fd, cmd_tast* t){
     if (t->cmdType == CMD_TYPE_REGIT_OKK) {
         printf("\n注册成功\n");
         strcpy(t->path, t->content);
-        printf("t->content: %s\n", t->content); // 修正打印语句
     }
 
     // 更新 current_path
     snprintf(current_path, sizeof(current_path), "/%s", t->content);
+    strcpy(username,t->content);
     
 
     return 0;

@@ -48,7 +48,7 @@ void login_01(cmd_tast* t,int* connect_fd,char *username){
         //clear_input_buffer();
 
         //处理错误
-        if(input_client_info("请输入用户名:",buffer,MAX_CMD_SIZE)==-1){
+        if(input_client_info("请输入用户名:",buffer,MAX_CMD_SIZE,1)==-1){
             error(0,errno,"input_client_info failed in login_01 ");
             continue; 
         }
@@ -71,16 +71,16 @@ void login_01(cmd_tast* t,int* connect_fd,char *username){
         
         //成功登录
         if(t->cmdType==CMD_TYPE_LOGIN1_OK){
-            printf(ANSI_COLOR_RED);
-            printf("netdisk:");
+            printf(ANSI_COLOR_CYAN);
+            printf("[System]");
             printf(ANSI_COLOR_RESET);
             printf("用户名正确请继续\n");
             break;
         }
         //没成功
         else if(t->cmdType==CMD_TYPE_LOGIN1_ERROR){
-            printf(ANSI_COLOR_RED);
-            printf("netdisk:");
+            printf(ANSI_COLOR_CYAN);
+            printf("[System]");
             printf(ANSI_COLOR_RESET);
             printf("用户名错误请重试\n");
             continue;
@@ -101,7 +101,7 @@ void login_02(cmd_tast* t,int* connect_fd,char *username){
          //存密码
          char bufferpassword[MAX_CMD_SIZE]={0};
          printf(ANSI_COLOR_CYAN);
-         input_client_info("请输入密码:",bufferpassword,sizeof(bufferpassword));
+         input_client_info("请输入密码:",bufferpassword,sizeof(bufferpassword),0);
          printf(ANSI_COLOR_RESET);
          //加密
          char* crypted_password=crypt(bufferpassword,buffersalt);
@@ -125,14 +125,12 @@ void login_02(cmd_tast* t,int* connect_fd,char *username){
          }
          //成功登录
          if(t->cmdType==CMD_TYPE_LOGIN2_OK){
-             printf(ANSI_COLOR_RED);
-             printf("netdisk:");
-             printf(ANSI_COLOR_RESET);
-             printf("密码正确,你的密文为%s\n",t->content);
              printf(ANSI_COLOR_CYAN);
-             printf("netdisk>>>>>>>>>>>>>>>>>>");
-             printf(ANSI_COLOR_RESET);
+             printf("[System]");
              printf("成功登录\n");
+             printf(ANSI_COLOR_HIGHLIGHT);
+             printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+             printf(ANSI_COLOR_RESET);
              // 更新 current_path
             //printf("current_path is = %s\n",current_path);
             snprintf(current_path, sizeof(current_path), "/%s", username);
@@ -141,7 +139,7 @@ void login_02(cmd_tast* t,int* connect_fd,char *username){
          }
          if(t->cmdType==CMD_TYPE_LOGIN2_ERROR){
              printf(ANSI_COLOR_RED);
-             printf("netdisk:");
+             printf("[System]");
              printf(ANSI_COLOR_RESET);
              printf("密码错误请重试\n");
              continue;
