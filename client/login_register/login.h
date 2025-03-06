@@ -9,6 +9,7 @@ void crypt_password(cmd_tast* t,char buf[],int len);
 //读取用户的输入相关
 int input_client_info(const char * logintips,char *buffer,int length,int type);
 
+
 //纠错
 void error(int status, int err, const char *fmt,...);
 

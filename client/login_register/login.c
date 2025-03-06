@@ -102,6 +102,7 @@ void login_02(cmd_tast* t,int* connect_fd,char *username){
          char bufferpassword[MAX_CMD_SIZE]={0};
          printf(ANSI_COLOR_CYAN);
          input_client_info("请输入密码:",bufferpassword,sizeof(bufferpassword),0);
+
          printf(ANSI_COLOR_RESET);
          //加密
          char* crypted_password=crypt(bufferpassword,buffersalt);
