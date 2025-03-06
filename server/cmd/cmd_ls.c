@@ -1,4 +1,7 @@
 #include "server_cmd.h"
+#define ANSI_COLOR_GREEN "\x1b[32m"
+#define ANSI_COLOR_RESET "\x1b[0m"
+
 int retain_or_not(char *path, int curr_count);
 int count_path(char *path);
 int cmd_ls(cmd_tast *t, MYSQL *p_mysql)
@@ -39,10 +42,23 @@ int cmd_ls(cmd_tast *t, MYSQL *p_mysql)
         {
             continue;
         }
-        strcat(t->content, row[2]);
-        strcat(t->content, "   ");
+        if (strcmp(row[6], "2") == 0)
+        {
+            printf("type === %s\n", row[6]);
+            strcat(t->content, ANSI_COLOR_GREEN);
+            strcat(t->content, row[2]);
+            strcat(t->content, ANSI_COLOR_RESET);
+            strcat(t->content, "   ");
+        }
+        else if (strcmp(row[6], "1") == 0)
+        {
+            /* code */
+            strcat(t->content, row[2]);
+            strcat(t->content, "   ");
+        }
+
         continue;
-        printf("\n");
+        // printf("\n");
     }
 
     return 0;
