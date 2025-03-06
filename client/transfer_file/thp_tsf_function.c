@@ -35,7 +35,7 @@ void save_offset(const char *offset_file, off_t offset) {
 }
 
 
-void handl_upload(int socketfd, char* filename) {
+void handl_upload(int socketfd, char* filename, char* currentPath) {
          //上传文件
         printf("即将上传...\n");
 
@@ -115,6 +115,8 @@ void handl_upload(int socketfd, char* filename) {
         }
         if(res[0] == '1'){
             printf("文件已存在，无需上传！\n");
+            printf("%s $ ", currentPath);
+             fflush(stdout);
             close(input_fd);
             close(socketfd); 
             return;
@@ -141,6 +143,8 @@ void handl_upload(int socketfd, char* filename) {
         }
         if(res[0] == '3'){
             printf("秒传成功！\n");
+            printf("%s $ ", currentPath);
+            fflush(stdout);
             close(input_fd);
             close(socketfd);
             return;
@@ -212,18 +216,19 @@ void handl_upload(int socketfd, char* filename) {
             remove(offset_path);
         }
 
-        printf("\nFile uploaded successfully.\n");
 
         // 关闭文件和连接
         close(input_fd);
         close(socketfd);
 
         printf("上传成功.\n");
+        printf("%s $ ", currentPath);
+        fflush(stdout);
 
 }
 
 
-void handl_download(int socketfd, char* filename) {
+void handl_download(int socketfd, char* filename, char* currentPath) {
         //下载文件
         printf("即将下载...\n");
 
@@ -315,6 +320,8 @@ void handl_download(int socketfd, char* filename) {
 
 
         printf("\n下载任务完成，断开数据TCP连接。\n");
+        printf("%s $ ", currentPath);
+         fflush(stdout);
 }
 /*
     介绍结构体t:
@@ -339,7 +346,8 @@ void* thp_tsf_function(void* arg){
     char* content = t->content;//download 1000mb_file
     char* filename = strtok(content," ");
     filename = strtok(NULL," ");
-    printf("filename:%s\n",filename);
+
+    char* currentPath = t->path;
     
     //创建新socket，并connect到服务器
     int socketfd = tcp_connect("127.0.0.1", 12222);
@@ -347,10 +355,10 @@ void* thp_tsf_function(void* arg){
     //----------------------已和服务端子线程函数建立了TCP连接------------------------------
 
     if(t->cmdType == CMD_TYPE_UPLOAD){
-        handl_upload(socketfd, filename);
+        handl_upload(socketfd, filename, currentPath);
     }
     if(t->cmdType == CMD_TYPE_DOWNLOAD){
-        handl_download(socketfd, filename);
+        handl_download(socketfd, filename, currentPath);
 
     }
 

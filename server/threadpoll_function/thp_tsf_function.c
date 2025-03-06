@@ -18,6 +18,7 @@ bool mysql_check_virtualPath_table(MYSQL *mysql, const char *file_path);//检查
 bool mysql_check_virtualPath_and_hash(MYSQL *mysql, const char *file_path, const char *hash);//检查数据库中是否存在文件路径和哈希值都相同
 void mysql_update_hash(MYSQL *mysql, const char *file_path, const char *new_hash);//更新数据库中传入file_path的哈希值
 void mysql_add_newline(MYSQL *mysql, const char *currentPath, const char *hash, info_t info);
+void mysql_get_hash_by_filePath(MYSQL *mysql, const char *file_path, char *hash);//根据文件路径获取哈希值
 
 void handl_upload(int socketfd, char* filename, char* currentPath, MYSQL * p_mysql){
 
@@ -89,7 +90,7 @@ void handl_upload(int socketfd, char* filename, char* currentPath, MYSQL * p_mys
 
     }
     // 不同目录下上传 内容一样的文件
-    if(hash_exits &&!virtualPath_exits){
+    if(hash_exits &&!virtualPath_exits ){
         // 回复标志3:秒传
         send(socketfd, "3", 1, 0);
         mysql_add_newline(p_mysql, currentPath, client_hash,info);
@@ -149,8 +150,6 @@ void handl_upload(int socketfd, char* filename, char* currentPath, MYSQL * p_mys
     }
     printf("\nFile received and saved as '%s'\n", output_path);
 
-    //传输完数据，插入数据库
-    mysql_add_newline(p_mysql, currentPath, client_hash,info);
     
 
      // 接收完文件后验证哈希
@@ -177,6 +176,8 @@ void handl_upload(int socketfd, char* filename, char* currentPath, MYSQL * p_mys
 
     // 比较哈希值
     if (strcmp(client_hash, server_hash_str) == 0) {
+        //传输完数据，插入数据库
+        mysql_add_newline(p_mysql, currentPath, client_hash,info);
         printf("文件校验成功，哈希值匹配！\n");
     } else {
         printf("警告：文件校验失败！\n");
@@ -196,13 +197,22 @@ void handl_upload(int socketfd, char* filename, char* currentPath, MYSQL * p_mys
     printf("客户端xxx上传文件完成，断开数据TCP连接");
 }
 
-void handl_download(int socketfd, char* filename){
+void handl_download(int socketfd, char* filename,  char* currentPath, MYSQL * p_mysql){
          //发送下载文件
         printf("下载处理中...\n");
 
-        // 打开要发送的文件
+        
+        // 根据文件路径获取哈希值
+        char* virtual_file_path = (char*)malloc(512);
+        snprintf(virtual_file_path, 512, "%s/%s", currentPath, filename);
+        char file_hash[65] = {0};
+        mysql_get_hash_by_filePath(p_mysql, virtual_file_path, file_hash);
+
+        // 打开要发送的文件 output_path="../fileshouse_server/"+hash
         char file_path[256];
-        snprintf(file_path, sizeof(file_path), "../fileshouse_server/%s", filename);
+        snprintf(file_path, sizeof(file_path), "../fileshouse_server/%s", file_hash);
+    
+
 
         int file_fd = open(file_path, O_RDONLY);
         if (file_fd < 0) {
@@ -273,7 +283,7 @@ void* thp_tsf_function(void * arg){
         handl_upload(socketfd, filename, currentPath, p_mysql);
     }
     if(t->cmdType == CMD_TYPE_DOWNLOAD){
-        handl_download(socketfd, filename);
+        handl_download(socketfd, filename, currentPath, p_mysql);
     }
 
     return NULL;
@@ -543,4 +553,48 @@ void mysql_add_newline(MYSQL *mysql,
     }
 
     printf("New record inserted successfully.\n");
+}
+
+// 根据文件路径获取哈希值
+void mysql_get_hash_by_filePath(MYSQL *mysql, const char *file_path, char *hash) {
+    // 初始化 SQL 查询语句
+    char query[1024];
+
+    // 假设表名为 virtual_file_table，包含两列：file_path 和 hash
+    snprintf(query, sizeof(query), "SELECT hash FROM virtual_file_table WHERE file_path = '%s'", file_path);
+
+    // 执行 SQL 查询
+    if (mysql_query(mysql, query) != 0) {
+        fprintf(stderr, "MySQL query error: %s\n", mysql_error(mysql));
+        // 如果查询出错，将哈希值置为空
+        strcpy(hash, "");
+        return;
+    }
+
+    // 获取查询结果
+    MYSQL_RES *result = mysql_store_result(mysql);
+    if (result == NULL) {
+        fprintf(stderr, "MySQL result error: %s\n", mysql_error(mysql));
+        // 如果获取结果出错，将哈希值置为空
+        strcpy(hash, "");
+        return;
+    }
+
+    // 获取结果集中的行数
+    int num_fields = mysql_num_fields(result);
+    MYSQL_ROW row;
+
+    // 检查是否有匹配的结果
+    if ((row = mysql_fetch_row(result))) {
+        // 检查目标缓冲区大小，避免缓冲区溢出
+        size_t hash_length = strlen(row[0]);
+        strcpy(hash, row[0]);
+        
+    } else {
+        // 如果没有匹配的结果，将哈希值置为空
+        strcpy(hash, "");
+    }
+
+    // 释放结果集
+    mysql_free_result(result);
 }
