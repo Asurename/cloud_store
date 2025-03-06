@@ -77,6 +77,7 @@ int main()
 
     int recv_num;
     int choice_made = 0;  // 标记是否已经做出选择
+    system("clear");
     while (!choice_made) {
         print_prompt("Input << 1 >>  Login");
         print_prompt("Input << 2 >>  Registration");
@@ -95,20 +96,18 @@ int main()
             choice_made = 1; // 标记已经做出选择
         }
     }
+
+    printf(ANSI_COLOR_YELLOW);
+    printf(ANSI_COLOR_START);
+    printf("[System]wellcome!\n\n");
+
     sleep(1);
-    printf(ANSI_COLOR_CYAN);
-    printf("[System]wellcome!\n");
     printf(ANSI_COLOR_RESET);
 
-    printf(ANSI_COLOR_CYAN);
-    printf("Cloud_disk:%s  \n",current_path);
+    printf("%s[%s(=´ω`=)]%s %s >> %s",ANSI_COLOR_CYAN,username,
+                       ANSI_COLOR_YELLOW, current_path,ANSI_COLOR_RESET);
     fflush(stdout);
-    printf(ANSI_COLOR_RESET);
 
-    printf(ANSI_COLOR_CYAN);
-    printf("%s@ %s $  ",username, current_path);
-    fflush(stdout);
-    printf(ANSI_COLOR_RESET);
 
     // 开始循环
     while (1)
@@ -121,10 +120,9 @@ int main()
             {
                 // 进入消息接收
                 clinet_msg_recv(cmd_fd, current_path);
-                printf(ANSI_COLOR_CYAN);
-                printf("%s@ %s $  ",current_path, current_path);
+                printf("%s[%s(=´ω`=)]%s %s >> %s",ANSI_COLOR_CYAN,username,
+                       ANSI_COLOR_YELLOW, current_path,ANSI_COLOR_RESET);
                 fflush(stdout);
-                printf(ANSI_COLOR_RESET);
             }
             else if (recv_events[i].data.fd == STDIN_FILENO)
             {
