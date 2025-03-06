@@ -119,7 +119,6 @@ int client_regite2(int connect_fd, cmd_tast* t){
         perror("crypt failed");
         return -1; // 加密失败
     }
-    printf("encrypted_password: %s\n", encrypted_password);
 
     t->cmdType = CMD_TYPE_REGIT2;
     // 把盐值换成密文
