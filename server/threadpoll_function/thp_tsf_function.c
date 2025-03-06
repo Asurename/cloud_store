@@ -207,6 +207,7 @@ void handl_download(int socketfd, char* filename,  char* currentPath, MYSQL * p_
         snprintf(virtual_file_path, 512, "%s/%s", currentPath, filename);
         char file_hash[65] = {0};
         mysql_get_hash_by_filePath(p_mysql, virtual_file_path, file_hash);
+        printf("virtual_file_path:%s",virtual_file_path);
 
         // 打开要发送的文件 output_path="../fileshouse_server/"+hash
         char file_path[256];
