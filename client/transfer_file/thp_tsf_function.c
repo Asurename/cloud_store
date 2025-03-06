@@ -338,6 +338,15 @@ void handl_download(int socketfd, char* filename, char* currentPath) {
 
 //文件传输线程要执行的函数
 void* thp_tsf_function(void* arg){
+
+    //解析获取配置文件中服务器ip和端口
+    Config config;
+    if (parse_config("config/config.json", &config) != 0)
+    {
+        fprintf(stderr, "parser failed\n");
+    }
+
+
     tast_queue* q = (tast_queue*)arg;
     //从队列中取出任务
     void* t1 = tast_queue_pop(q);//线程一般会在这阻塞和唤醒
@@ -349,8 +358,8 @@ void* thp_tsf_function(void* arg){
 
     char* currentPath = t->path;
     
-    //创建新socket，并connect到服务器
-    int socketfd = tcp_connect("127.0.0.1", 12222);
+    //创建新socket，并connect到服务器::config.client.ip指的服务器ip
+    int socketfd = tcp_connect(config.client.ip, config.client.tsf_port);
     printf("已和服务端子线程函数建立了TCP连接\n");
     //----------------------已和服务端子线程函数建立了TCP连接------------------------------
 

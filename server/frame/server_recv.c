@@ -40,6 +40,10 @@ int server_msg_recv(int fd, int epfd, threadpool* thp_cmd,threadpool* thp_tsf,st
         syslog(LOG_INFO,"[USER_EXIT]User %d exit\n",fd);
         printf("[USER_EXIT]User %d exit\n",fd);
         printf(ANSI_COLOR_RESET);
+        int setIdx = -1;
+        int current_index = user_table_find(fd,userTable,&setIdx);
+        netfdArray[current_index][setIdx] = -1;
+        user_table_erase(fd,userTable);
         close(fd);
         epoll_mod(epfd,EPOLL_CTL_DEL,EPOLLIN,fd);
         free(recv_t);
