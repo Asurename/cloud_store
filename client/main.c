@@ -3,6 +3,7 @@
 #include "login_register/register.h"
 char current_path[512];
 // 封装打印提示信息的函数
+char username[MAX_CMD_SIZE];
 void print_prompt(const char* message) {
     printf(ANSI_COLOR_CYAN);
     printf("[System]");
@@ -66,7 +67,6 @@ int main()
     int t_len = sizeof(cmd_tast);
     char buf[MAX_CMD_SIZE];
 
-    char username[MAX_CMD_SIZE];
 
     // 建立epoll监听
     int epfd = epoll_create1(0);
