@@ -2,6 +2,9 @@
 #include "../lib.h"
 #include <sys/sendfile.h>
 #include <openssl/sha.h>
+#include <l8w8jwt/decode.h>
+#include <l8w8jwt/encode.h>
+//#include "../token/token.h"
 typedef struct {
    int parent_id;
    char *filename;//已有
@@ -278,7 +281,17 @@ void* thp_tsf_function(void * arg){
     int socketfd = accept(listenfd,(struct sockaddr*)&client_addr,&client_addr_len);
     printf("已和客户端子线程函数建立了TCP连接\n");
     //----------------------已和客户端子线程函数建立了TCP连接------------------------------
-
+    cmd_tast t2;
+    memset(&t2,0,sizeof(t2));
+    recv(socketfd,(void*)&t2,sizeof(t2),MSG_WAITALL);
+    int validation_result =  decode(t2.remain);
+    if(validation_result != L8W8JWT_VALID)
+    {
+        printf("jwt error\n");
+        close(socketfd);
+        return (void*)-1;
+    }
+    printf("令牌验证成功\n");
     if(t->cmdType == CMD_TYPE_UPLOAD){
         handl_upload(socketfd, filename, currentPath, p_mysql);
     }

@@ -16,9 +16,13 @@ void* thp_cmd_function(void * arg){
     int t_len = sizeof(cmd_tast);
     MYSQL* p_mysql;
     p_mysql = mysql_disk_connect(MYSQL_IP, MYSQL_PORT, MYSQL_NAME, MYSQL_PASSWD, MYSQL_DB);
+    char username[1024];
+    char jwt[4096];
     //------------------------------------------------//
     //命令处理区
     while (1) {
+        memset(username,0,sizeof(username));
+        memset(jwt,0,sizeof(jwt));
         t = (cmd_tast*)tast_queue_pop(q);
         int send_fd = t->peerfd;
 
@@ -65,10 +69,15 @@ void* thp_cmd_function(void * arg){
              server_regite2(t,p_mysql);
             break;
         case CMD_TYPE_LOGIN1:
-            server_login1(t,p_mysql);
+            server_login1(t,p_mysql,&username);
+            printf("username : %s\n",username);
             break;
         case CMD_TYPE_LOGIN2:
-            server_login2(t,p_mysql);
+            printf("-------------");
+            encode(username,&jwt);
+            printf("---------------------------------");
+            printf("jwt : %s\n",jwt);
+            server_login2(t,p_mysql,jwt);
             break;
 
         }

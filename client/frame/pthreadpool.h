@@ -2,19 +2,20 @@
 #define __PTHREADPOOL_H
 #include "tast_queue.h"
 
-//Ïß³Ì³Ø½á¹¹Ìå
+//ï¿½ß³Ì³Ø½á¹¹ï¿½ï¿½
 typedef struct threadpool_s {
+    char jwt[4096];
     pthread_t* pthreads;
     int pthread_num;
     tast_queue* q;
 }threadpool;
-//Ïß³Ì³Ø³õÊ¼»¯£¬²»Æô¶¯
+//ï¿½ß³Ì³Ø³ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 threadpool* threadpool_init(int num);
-//Ïß³Ì³ØÆô¶¯
+//ï¿½ß³Ì³ï¿½ï¿½ï¿½ï¿½ï¿½
 int threadpool_start(threadpool* thp, void* start_function(void* arg), void* arg);
-//Ïß³Ì³ØÏú»Ù
+//ï¿½ß³Ì³ï¿½ï¿½ï¿½ï¿½ï¿½
 int threadpool_destroy(threadpool* thp);
-//Ïß³Ì³ØÍ£Ö¹
+//ï¿½ß³Ì³ï¿½Í£Ö¹
 int threadpool_stop(threadpool* thp);
 
 #endif

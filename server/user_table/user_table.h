@@ -20,6 +20,6 @@ typedef struct user_table
 struct user_table *user_table_init();
 int user_table_add(int user_fd,int timeoutArrayIndex, user_table_t* ut,int setIdx);
 int user_table_erase(int user_fd, user_table_t* ut);
-int user_table_change(int user_fd,int timeoutArrayIndex, user_table_t* ut,int setIdx);
+// int user_table_change(int user_fd,int timeoutArrayIndex, user_table_t* ut,int setIdx);
 int user_table_find(int user_fd, user_table_t* ut,int *setIdx);
 #endif

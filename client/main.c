@@ -53,7 +53,7 @@ int main()
         close(cmd_fd);
         return -1;
     }
-    threadpool_start(thp_tsf, thp_tsf_function, (void *)thp_tsf->q);
+    //threadpool_start(thp_tsf, thp_tsf_function, (void *)thp_tsf);
     
     //初始化接收状态
     char path[PATH_SIZE] = {'\0'};
@@ -75,6 +75,7 @@ int main()
 
     epoll_mod(epfd, EPOLL_CTL_ADD, EPOLLIN, STDIN_FILENO);
 
+    //char jwt[4096] = {0};
     int recv_num;
     int choice_made = 0;  // 标记是否已经做出选择
     system("clear");
@@ -96,7 +97,10 @@ int main()
 
         if (c == '1') {
             login_01(&t_send, &cmd_fd,username);
-            login_02(&t_send, &cmd_fd,username);
+            //printf("[DEBUG] jwt address: %p\n", thp_tsf->jwt);
+            login_02(&t_send, &cmd_fd,username,thp_tsf->jwt);
+            //strcpy(&(thp_tsf->jwt),jwt);
+            printf("thp-tsf->jwt : %s\n",thp_tsf->jwt);
             strcpy(path, t_send.path);
             choice_made = 1; // 标记已经做出选择
         } else if (c == '2') {
@@ -106,6 +110,7 @@ int main()
             choice_made = 1; // 标记已经做出选择
         }
     }
+    threadpool_start(thp_tsf, thp_tsf_function, (void *)thp_tsf);
     sleep(1);
 
     printf(ANSI_COLOR_YELLOW);

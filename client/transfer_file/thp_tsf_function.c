@@ -346,8 +346,8 @@ void* thp_tsf_function(void* arg){
         fprintf(stderr, "parser failed\n");
     }
 
-
-    tast_queue* q = (tast_queue*)arg;
+    threadpool *tp = (threadpool *)arg;
+    tast_queue* q = tp->q;
     //从队列中取出任务
     void* t1 = tast_queue_pop(q);//线程一般会在这阻塞和唤醒
     cmd_tast* t = (cmd_tast*)t1;
@@ -362,6 +362,10 @@ void* thp_tsf_function(void* arg){
     int socketfd = tcp_connect(config.client.ip, config.client.tsf_port);
     printf("已和服务端子线程函数建立了TCP连接\n");
     //----------------------已和服务端子线程函数建立了TCP连接------------------------------
+    cmd_tast t2;
+    memset(&t2,0,sizeof(t2));
+    strcpy(t2.remain,tp->jwt);
+    send(socketfd,(void*)&t2,sizeof(t2),0);
 
     if(t->cmdType == CMD_TYPE_UPLOAD){
         handl_upload(socketfd, filename, currentPath);

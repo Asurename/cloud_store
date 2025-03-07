@@ -1,17 +1,18 @@
 #include "pthreadpool.h"
 #include "../config/config.h"
 
-//³õÊ¼»¯Ïß³Ì³Ø 
+//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ß³Ì³ï¿½ 
 threadpool* threadpool_init(int num) {
     threadpool* thp = (threadpool*)malloc(sizeof(threadpool));
     thp->pthreads = (pthread_t*)malloc(sizeof(pthread_t) * num);
     thp->pthread_num = num;
+    memset(thp->jwt,0,sizeof(thp->jwt));
     thp->q = tast_queue_create();
     return thp;
 }
 
 //--------------------------------------------------------------------------------------------------//
-//Ïß³Ì³ØÆô¶¯
+//ï¿½ß³Ì³ï¿½ï¿½ï¿½ï¿½ï¿½
 int threadpool_start(threadpool* thp, void* start_function(void* arg), void* arg) {
     int err;
     for (int i = 0; i < thp->pthread_num; i++) {
@@ -28,7 +29,7 @@ int threadpool_start(threadpool* thp, void* start_function(void* arg), void* arg
 }
 
 //--------------------------------------------------------------------------------------------------//
-//Ïß³Ì³ØÏú»Ù
+//ï¿½ß³Ì³ï¿½ï¿½ï¿½ï¿½ï¿½
 int threadpool_destroy(threadpool* thp) {
     free(thp->pthreads);
     tast_queue_destroy(thp->q);

@@ -89,7 +89,7 @@ void login_01(cmd_tast* t,int* connect_fd,char *username){
 }
 //login2流程
 //基于第一步获取盐值----对用户输入的密码进行加密-----发送给服务器----根据服务器响应是否成功
-void login_02(cmd_tast* t,int* connect_fd,char *username){
+void login_02(cmd_tast* t,int* connect_fd,char *username,char *jwt){
      //存盐值
      char buffersalt[4096]={0};
      strncpy(buffersalt,t->content,strlen(t->content));
@@ -137,6 +137,11 @@ void login_02(cmd_tast* t,int* connect_fd,char *username){
             //printf("current_path is = %s\n",current_path);
             snprintf(current_path, sizeof(current_path), "/%s", username);
             //printf("%s@1111 /%s $",username, username);  // 使用保存的用户名
+            //printf("[DEBUG] t->remain address: %p, content: '%s'\n", t->remain, t->remain);
+            //printf("[DEBUG] jwt address: %p\n", jwt);
+            //t->remain[sizeof(t->remain) - 1] = '\0';  
+            strncpy(jwt,t->remain,sizeof(t->remain));
+            //printf("jwt : %s,t->remain : %s\n",jwt,t->remain);
              break;
          }
          if(t->cmdType==CMD_TYPE_LOGIN2_ERROR){

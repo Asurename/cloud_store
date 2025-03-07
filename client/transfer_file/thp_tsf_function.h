@@ -4,6 +4,7 @@
 #include "../network/tcp_connect.h"
 #include "../frame/cmd_tast.h"
 #include "../config/config.h"
+#include "../frame/pthreadpool.h"
 void* thp_tsf_function(void* arg);
 
 #endif
