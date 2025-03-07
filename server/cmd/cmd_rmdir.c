@@ -56,9 +56,6 @@ int cmd_rmdir(cmd_tast *t, MYSQL *p_mysql)
         snprintf(query, sizeof(query),
                  "SELECT count(*) FROM virtual_file_table WHERE file_path LIKE '%s_%%'", buf[i]);
 
-        // // 打印生成的 SQL 查询
-        // printf("Generated SQL Query: %s\n", query);
-
         // 执行查询
         if (mysql_query(p_mysql, query))
         {
@@ -82,13 +79,25 @@ int cmd_rmdir(cmd_tast *t, MYSQL *p_mysql)
             int count = atoi(row[0]);
             if (count == 0)
             {
-                snprintf(query, sizeof(query),
-                         "DELETE FROM virtual_file_table WHERE file_path = '%s'", buf[i]);
-                // 执行查询
-                if (mysql_query(p_mysql, query))
+                char query1[512];
+                bzero(query1, sizeof(query1));
+                snprintf(query1, sizeof(query1),
+                         "SELECT count(*) FROM virtual_file_table WHERE file_path = '%s' AND type = 1", buf[i]);
+                mysql_query(p_mysql, query1);
+                MYSQL_RES *result1 = mysql_store_result(p_mysql);
+                MYSQL_ROW row1 = mysql_fetch_row(result1);
+                int count1 = atoi(row1[0]);
+
+                if (count1 == 1)
                 {
-                    fprintf(stderr, "Delete failed: %s\n", mysql_error(p_mysql));
-                    return -1; // 返回 -1 表示错误
+                    snprintf(query, sizeof(query),
+                             "DELETE FROM virtual_file_table WHERE file_path = '%s'", buf[i]);
+                    // 执行查询
+                    if (mysql_query(p_mysql, query))
+                    {
+                        fprintf(stderr, "Delete failed: %s\n", mysql_error(p_mysql));
+                        return -1; // 返回 -1 表示错误
+                    }
                 }
 
                 // 获取受影响的行数
