@@ -82,11 +82,12 @@ int cmd_rmdir(cmd_tast *t, MYSQL *p_mysql)
                 char query1[512];
                 bzero(query1, sizeof(query1));
                 snprintf(query1, sizeof(query1),
-                         "SELECT count(*) FROM virtual_file_table WHERE type = 1", buf[i]);
+                         "SELECT count(*) FROM virtual_file_table WHERE file_path = '%s' AND type = 1", buf[i]);
                 mysql_query(p_mysql, query1);
                 MYSQL_RES *result1 = mysql_store_result(p_mysql);
                 MYSQL_ROW row1 = mysql_fetch_row(result1);
                 int count1 = atoi(row1[0]);
+
                 if (count1 == 1)
                 {
                     snprintf(query, sizeof(query),
