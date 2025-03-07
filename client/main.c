@@ -103,7 +103,7 @@ int main()
             //printf("[DEBUG] jwt address: %p\n", thp_tsf->jwt);
             login_02(&t_send, &cmd_fd,username,thp_tsf->jwt);
             //strcpy(&(thp_tsf->jwt),jwt);
-            printf("thp-tsf->jwt : %s\n",thp_tsf->jwt);
+            //printf("thp-tsf->jwt : %s\n",thp_tsf->jwt);
             strcpy(path, t_send.path);
             choice_made = 1; // 标记已经做出选择
         } else if (c == '2') {
