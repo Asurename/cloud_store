@@ -371,7 +371,7 @@ void* thp_tsf_function(void* arg){
     
     //创建新socket，并connect到服务器::config.client.ip指的服务器ip
     int socketfd = tcp_connect(config.client.ip, config.client.tsf_port);
-    printf("已和服务器建立专属数据通道...\n");
+    printf("购买VIP即可解锁超高速专线.\n");
     //----------------------已和服务端子线程函数建立了TCP连接------------------------------
 
     if(t->cmdType == CMD_TYPE_UPLOAD){
