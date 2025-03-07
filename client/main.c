@@ -155,21 +155,19 @@ int main()
 
 
 void print_line(){
-    char arr[7][4096];
-    for(int i = 0;i<7;i++){
+    char arr[5][4096];
+    for(int i = 0;i<5;i++){
         memset(arr[i],0,4096);
     }
-    strcpy(arr[0],"[lgx]1");
-    strcpy(arr[1],"[james]2025湖人总冠军！！！！！");
-    strcpy(arr[2],"[suis]甜豆腐脑是对的，咸豆腐脑是错的");
-    strcpy(arr[3],"[ksz]4");
-    strcpy(arr[4],"[dsw]广告位待租，价优，诚邀合作!");
-    strcpy(arr[5],"[wzh]6");
-    strcpy(arr[6],"[Luxun]大抵是我的口袋清高了，世俗的铜臭味已经入不了它的世界。");
+    strcpy(arr[0],"[写命令和文件系统的james]2025湖人总冠军！！！！！");
+    strcpy(arr[1],"[摸鱼的suis]甜豆腐脑是对的，咸豆腐脑是错的");
+    strcpy(arr[2],"[写文件传输的dsw]广告位待租，价优，诚邀合作!");
+    strcpy(arr[3],"[脑袋尖尖的wzh]那我问你?盐值是男的还是女的?");
+    strcpy(arr[4],"[写命令的Luxun]大抵是我的口袋清高了，世俗的铜臭味已经入不了它的世界。");
     
     srand((unsigned)time(NULL));
     int seed = rand();
     printf("%s%sTips:%s%s\n\n",ANSI_COLOR_HIGHLIGHT,
-           ANSI_COLOR_PURPLE,arr[seed%7],
+           ANSI_COLOR_PURPLE,arr[seed%5],
            ANSI_COLOR_RESET);
 }
