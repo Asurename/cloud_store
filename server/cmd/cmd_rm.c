@@ -62,7 +62,7 @@ int cmd_rm(cmd_tast *t, MYSQL *p_mysql)
             return 1;
         }
 
-        // 获取结果集
+                // 获取结果集
         MYSQL_RES *result = mysql_store_result(p_mysql);
         if (result == NULL)
         {
