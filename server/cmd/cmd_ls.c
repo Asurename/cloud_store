@@ -1,5 +1,6 @@
 #include "server_cmd.h"
-#define ANSI_COLOR_GREEN "\x1b[32m"
+#define ANSI_COLOR_GREEN "\x1b[95m"
+#define ANSI_COLOR_BRIGHT_MAGENTA "\x1b[95m"
 #define ANSI_COLOR_RESET "\x1b[0m"
 
 int retain_or_not(char *path, int curr_count);
@@ -42,15 +43,15 @@ int cmd_ls(cmd_tast *t, MYSQL *p_mysql)
         {
             continue;
         }
-        if (strcmp(row[6], "2") == 0)
+        if (strcmp(row[6], "1") == 0)
         {
             printf("type === %s\n", row[6]);
-            strcat(t->content, ANSI_COLOR_GREEN);
+            strcat(t->content, ANSI_COLOR_BRIGHT_MAGENTA);
             strcat(t->content, row[2]);
             strcat(t->content, ANSI_COLOR_RESET);
             strcat(t->content, "   ");
         }
-        else if (strcmp(row[6], "1") == 0)
+        else if (strcmp(row[6], "2") == 0)
         {
             /* code */
             strcat(t->content, row[2]);

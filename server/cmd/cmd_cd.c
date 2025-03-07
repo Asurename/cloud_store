@@ -73,7 +73,7 @@ int cmd_cd(cmd_tast *t, MYSQL *p_mysql)
     char query[512];
     // 构造查询字符串
     snprintf(query, sizeof(query),
-             "SELECT COUNT(*) FROM virtual_file_table WHERE file_path = '%s'", buf);
+             "SELECT COUNT(*) FROM virtual_file_table WHERE file_path = '%s' AND type = 1", buf);
 
     // 执行查询
     if (mysql_query(p_mysql, query))
