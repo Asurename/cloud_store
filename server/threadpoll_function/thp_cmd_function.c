@@ -73,9 +73,9 @@ void* thp_cmd_function(void * arg){
             printf("username : %s\n",username);
             break;
         case CMD_TYPE_LOGIN2:
-            printf("-------------");
+            //printf("-------------");
             encode(username,&jwt);
-            printf("---------------------------------");
+            //printf("---------------------------------");
             printf("jwt : %s\n",jwt);
             server_login2(t,p_mysql,jwt);
             break;

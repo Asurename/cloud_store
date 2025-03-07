@@ -16,7 +16,7 @@ int timeout_array_add(int (*netfdArray)[1024], user_table_t *userTable, int time
             {
                 setIdx = i;
                 netfdArray[TIMEOUT_ARRAY - 1][i] = user_fd;
-                user_table_add(user_fd,TIMEOUT_ARRAY - 1, userTable, i);
+                user_table_add(user_fd,TIMEOUT_ARRAY, userTable, i);
                 syslog(LOG_INFO, "Thread %ld: Added user_fd %d at netfdArray[%d][%d]\n", pthread_self(), user_fd, TIMEOUT_ARRAY - 1, i);
                 printf("Thread %ld: Added user_fd %d at netfdArray[%d][%d]\n", pthread_self(), user_fd, TIMEOUT_ARRAY - 1, i);
                 break;
@@ -90,7 +90,7 @@ int timeout_array_change(int (*netfdArray)[1024], user_table_t *userTable, int t
     //     }
     // }
 
-    if (netfdArray[idx][setIdx] != -1)
+    if (netfdArray[idx][setIdx] != -1 && setIdx != -1)
     {
         netfdArray[idx][setIdx] = -1;
         timeout_array_add(netfdArray, userTable, timeoutArrayIndex, user_fd,&setIdx);
