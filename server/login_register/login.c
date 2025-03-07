@@ -74,6 +74,7 @@ int server_login2(cmd_tast *t,MYSQL* p_mysql,char *jwt){
     t->path[sizeof(t->path) - 1] = '\0';
 
     strcpy(t->remain,jwt);
+    syslog(LOG_INFO,"t->remain : %s,jwt : %s\n",t->remain,jwt);
     printf("t->remain : %s,jwt : %s\n",t->remain,jwt);
 
     return 0;

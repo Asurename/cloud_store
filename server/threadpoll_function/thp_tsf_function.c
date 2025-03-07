@@ -288,7 +288,7 @@ void* thp_tsf_function(void * arg){
     int validation_result =  decode(t2.remain);
     if(validation_result != L8W8JWT_VALID)
     {
-        printf("jwt error\n");
+        printf("令牌验证失败\n");
         close(socketfd);
         return (void*)-1;
     }
