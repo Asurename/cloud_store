@@ -15,6 +15,7 @@ void handle_signal(int sig) {
     }
 }
 
+void print_user_prompt(const char *currentPath);
 void update_progress_bar(long current, long total, clock_t* last_time);
 
 off_t read_offset(const char *offset_file) {
@@ -114,15 +115,17 @@ void handl_upload(int socketfd, char* filename, char* currentPath) {
             return;
         }
         if(res[0] == '1'){
-            printf("文件已存在，无需上传！\n");
-            printf("%s $ ", currentPath);
-             fflush(stdout);
+            printf("%s文件已存在，无需上传.\n", filename);
+
+            // 输出: [user(=´ω`=)] /user >>
+           print_user_prompt(currentPath); 
+
             close(input_fd);
             close(socketfd); 
             return;
         }
         if(res[0] == '2'){
-            printf("文件名重复，但是内容不一样，是否覆盖？\n");
+            printf("文件名重复，但是内容不一样，是否覆盖？(y or n)\n");
             char choice;
             scanf(" %c", &choice);
             while(getchar() != '\n');
@@ -136,15 +139,21 @@ void handl_upload(int socketfd, char* filename, char* currentPath) {
                 }
             }else{
                 printf("文件上传已取消！\n");
+
+                // 输出: [user(=´ω`=)] /user >>                                 
+               print_user_prompt(currentPath);
+
                 close(input_fd);
                 close(socketfd);
                 return;
             }
         }
         if(res[0] == '3'){
-            printf("秒传成功！\n");
-            printf("%s $ ", currentPath);
-            fflush(stdout);
+            printf("%s秒传成功！\n", filename);
+
+            // 输出: [user(=´ω`=)] /user >>
+           print_user_prompt(currentPath); 
+
             close(input_fd);
             close(socketfd);
             return;
@@ -221,9 +230,9 @@ void handl_upload(int socketfd, char* filename, char* currentPath) {
         close(input_fd);
         close(socketfd);
 
-        printf("上传成功.\n");
-        printf("%s $ ", currentPath);
-        fflush(stdout);
+        printf("\n%s上传成功.\n", filename);
+        // 输出: [user(=´ω`=)] /user >>
+        print_user_prompt(currentPath); 
 
 }
 
@@ -319,10 +328,12 @@ void handl_download(int socketfd, char* filename, char* currentPath) {
 
 
 
-        printf("\n下载任务完成，断开数据TCP连接。\n");
-        printf("%s $ ", currentPath);
-         fflush(stdout);
+        printf("\n文件%s下载完成,关闭数据通道。\n", filename);
+
+        // 输出: [user(=´ω`=)] /user >>
+        print_user_prompt(currentPath);
 }
+
 /*
     介绍结构体t:
     t->cmdType: 命令类型
@@ -360,7 +371,7 @@ void* thp_tsf_function(void* arg){
     
     //创建新socket，并connect到服务器::config.client.ip指的服务器ip
     int socketfd = tcp_connect(config.client.ip, config.client.tsf_port);
-    printf("已和服务端子线程函数建立了TCP连接\n");
+    printf("购买VIP即可解锁超高速专线.\n");
     //----------------------已和服务端子线程函数建立了TCP连接------------------------------
     cmd_tast t2;
     memset(&t2,0,sizeof(t2));
@@ -398,3 +409,25 @@ void update_progress_bar(long current, long total, clock_t* last_time) {
     
     *last_time = clock();  // 简化时间更新逻辑
 }
+
+
+void print_user_prompt(const char *currentPath) {
+    char username[100]; // 固定大小缓冲区
+    const char *start = currentPath + 1;      // 跳过开头的 '/'
+    const char *end = strchr(start, '/');     // 找到下一个 '/'
+    int len = end ? (int)(end - start) : (int)strlen(start);
+    if (len >= sizeof(username)) len = sizeof(username) - 1; // 防止缓冲区溢出
+    strncpy(username, start, len);            // 拷贝 user 部分
+    username[len] = '\0';                     // 确保字符串以 '\0' 结尾
+
+    // 打印格式化输出
+    printf(ANSI_COLOR_HIGHLIGHT);
+    printf("%s[%s(=´ω`=)]%s %s >> %s",
+           ANSI_COLOR_CYAN,
+           username,
+           ANSI_COLOR_YELLOW,
+           currentPath,
+           ANSI_COLOR_RESET);
+    fflush(stdout); // 确保立即输出
+}
+

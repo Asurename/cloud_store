@@ -16,7 +16,8 @@ int clinet_msg_recv(int fd, char *current_path)
 
     if (ret == 0)
     {
-        error(1, errno,"%serror:数据接收长度为0%s",ANSI_COLOR_RED,ANSI_COLOR_RESET);
+        error(1, errno,"%s%s[Error]服务器主动断开链接%s",ANSI_COLOR_RED,ANSI_COLOR_HIGHLIGHT,
+              ANSI_COLOR_RESET);
         return -1;
     }
 

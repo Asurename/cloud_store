@@ -3,6 +3,7 @@
 #include "login_register/register.h"
 char current_path[512];
 // 封装打印提示信息的函数
+char username[MAX_CMD_SIZE];
 void print_prompt(const char* message) {
     printf(ANSI_COLOR_CYAN);
     printf("[System]");
@@ -25,6 +26,7 @@ char get_valid_input() {
     }
 }
 
+void print_line();
 
 int main()
 {
@@ -66,7 +68,6 @@ int main()
     int t_len = sizeof(cmd_tast);
     char buf[MAX_CMD_SIZE];
 
-    char username[MAX_CMD_SIZE];
 
     // 建立epoll监听
     int epfd = epoll_create1(0);
@@ -85,6 +86,8 @@ int main()
     printf("------------------------------------------\n");
     printf("\t欢迎使用new组云服务器\n");
     printf("\t请先完成登入或注册\n");
+    printf("\tVIP 30/月 享受高速下载专线\n");
+    printf("\t首次购买享受八折优惠！(๑´ڡ`๑)\n");
     printf("------------------------------------------\n");
     printf(ANSI_COLOR_RESET);
     sleep(1);
@@ -122,6 +125,8 @@ int main()
     printf("------------------------------------------\n\n");
     printf(ANSI_COLOR_RESET);
 
+    print_line();
+
     printf(ANSI_COLOR_HIGHLIGHT);
     printf("%s[%s(=´ω`=)]%s %s >> %s",ANSI_COLOR_CYAN,username,
                        ANSI_COLOR_YELLOW, current_path,ANSI_COLOR_RESET);
@@ -151,4 +156,23 @@ int main()
             }
         }
     }
+}
+
+
+void print_line(){
+    char arr[5][4096];
+    for(int i = 0;i<5;i++){
+        memset(arr[i],0,4096);
+    }
+    strcpy(arr[0],"[写命令和文件系统的james]2025湖人总冠军！！！！！");
+    strcpy(arr[1],"[摸鱼的suis]甜豆腐脑是对的，咸豆腐脑是错的");
+    strcpy(arr[2],"[写文件传输的dsw]广告位待租，价优，诚邀合作!");
+    strcpy(arr[3],"[脑袋尖尖的wzh]那我问你?盐值是男的还是女的?");
+    strcpy(arr[4],"[写命令的Luxun]大抵是我的口袋清高了，世俗的铜臭味已经入不了它的世界。");
+    
+    srand((unsigned)time(NULL));
+    int seed = rand();
+    printf("%s%sTips:%s%s\n\n",ANSI_COLOR_HIGHLIGHT,
+           ANSI_COLOR_PURPLE,arr[seed%5],
+           ANSI_COLOR_RESET);
 }
