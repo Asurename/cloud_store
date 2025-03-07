@@ -26,6 +26,7 @@ char get_valid_input() {
     }
 }
 
+void print_line();
 
 int main()
 {
@@ -119,6 +120,8 @@ int main()
     printf("------------------------------------------\n\n");
     printf(ANSI_COLOR_RESET);
 
+    print_line();
+
     printf(ANSI_COLOR_HIGHLIGHT);
     printf("%s[%s(=´ω`=)]%s %s >> %s",ANSI_COLOR_CYAN,username,
                        ANSI_COLOR_YELLOW, current_path,ANSI_COLOR_RESET);
@@ -148,4 +151,25 @@ int main()
             }
         }
     }
+}
+
+
+void print_line(){
+    char arr[7][4096];
+    for(int i = 0;i<7;i++){
+        memset(arr[i],0,4096);
+    }
+    strcpy(arr[0],"[lgx]1");
+    strcpy(arr[1],"[james]2025湖人总冠军！！！！！");
+    strcpy(arr[2],"[suis]甜豆腐脑是对的，咸豆腐脑是错的");
+    strcpy(arr[3],"[ksz]4");
+    strcpy(arr[4],"[dsw]广告位待租，价优，诚邀合作!");
+    strcpy(arr[5],"[wzh]6");
+    strcpy(arr[6],"[Luxun]大抵是我的口袋清高了，世俗的铜臭味已经入不了它的世界。");
+    
+    srand((unsigned)time(NULL));
+    int seed = rand();
+    printf("%s%sTips:%s%s\n\n",ANSI_COLOR_HIGHLIGHT,
+           ANSI_COLOR_PURPLE,arr[seed%7],
+           ANSI_COLOR_RESET);
 }
