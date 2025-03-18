@@ -1,0 +1,20 @@
+{
+    "server": {
+        "ip": "192.168.182.130",
+        "ports": {
+            "cmd": 13333,
+            "tsf": 12222
+        }
+    },
+    "thread_pool": {
+        "cmd_num": 4,
+        "tsf_num": 4
+    },
+    "mysql": {
+        "ip": "42.194.149.92",
+        "port": 3306,
+        "username": "root",
+        "password": "6862420ok",
+        "database": "cloud_disk_v2"
+    }
+}
